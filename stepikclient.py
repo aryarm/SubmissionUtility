@@ -11,7 +11,7 @@ from filemanager import FileManager
 from languagemanager import LanguageManager
 
 from settings import STEPIK_API_URL
-from utils import exit_util, get_lesson_id, get_step_id
+from utils import exit_util, get_lesson_id, get_step_id, prepare_ids
 
 
 def request(request_type, link, **kwargs):
@@ -215,3 +215,32 @@ def get_courses(user, **kwargs):
 def get_course(user, course_id):
     courses = get_request(STEPIK_API_URL + "/courses/{}".format(course_id), headers=get_headers(user))
     return courses.json()
+
+
+def get_sections(user, ids, page):
+    url = STEPIK_API_URL + "/sections/?" + prepare_ids(ids) + '&page=' + str(page)
+    courses = get_request(url, headers=get_headers(user))
+    return courses.json()
+
+
+def get_units(user, ids, page):
+    url = STEPIK_API_URL + "/units/?" + prepare_ids(ids) + '&page=' + str(page)
+    units = get_request(url, headers=get_headers(user))
+    return units.json()
+
+
+def get_section(user, section_id):
+    courses = get_request(STEPIK_API_URL + "/sections/{}".format(section_id), headers=get_headers(user))
+    return courses.json()
+
+
+def get_lessons(user, ids, page):
+    url = STEPIK_API_URL + "/lessons/?" + prepare_ids(ids) + '&page=' + str(page)
+    lessons = get_request(url, headers=get_headers(user))
+    return lessons.json()
+
+
+def get_steps(user, ids, page):
+    url = STEPIK_API_URL + "/steps/?" + prepare_ids(ids) + '&page=' + str(page)
+    lessons = get_request(url, headers=get_headers(user))
+    return lessons.json()
