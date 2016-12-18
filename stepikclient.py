@@ -48,7 +48,7 @@ def check_user(user):
         user.refresh_token = (resp.json())['refresh_token']
         user.save()
     except Exception:
-        exit_util("Check your Client id and Client secret.")
+        exit_util("Check your authentication.")
 
 
 def get_headers(user):
@@ -75,35 +75,22 @@ def refresh_client(user):
     return True
 
 
-# def auth_user(user):
-#     if not refresh_client(user):
-#         check_user(user)
-
-
 def get_lesson(user, lesson_id):
-    # auth_user(user)
-
     lesson = get_request(STEPIK_API_URL + "/lessons/{}".format(lesson_id), headers=get_headers(user))
     return lesson.json()
 
 
 def get_submission(user, attempt_id):
-    # auth_user(user)
-
     resp = get_request(STEPIK_API_URL + "/submissions/{}".format(attempt_id), headers=get_headers(user))
     return resp.json()
 
 
 def get_attempt(user, data):
-    # auth_user(user)
-
     resp = requests.post(STEPIK_API_URL + "/attempts", data=data, headers=get_headers(user))
     return resp.json()
 
 
 def get_attempt_id(user, step_id):
-    # auth_user(user)
-
     attempt = get_attempt(user, json.dumps({"attempt": {"step": str(step_id)}}))
     try:
         return attempt['attempts'][0]['id']
@@ -113,8 +100,6 @@ def get_attempt_id(user, step_id):
 
 
 def get_submit(user, url, data):
-    # auth_user(user)
-
     resp = post_request(url, data=data, headers=get_headers(user))
     return resp.json()
 
@@ -125,7 +110,6 @@ def get_step(user, step_id):
 
 
 def get_languages_list(user):
-    # auth_user(user)
     current_step = attempt_storage.get_step_id()
     step = get_step(user, current_step)
     block = step['steps'][0]['block']
