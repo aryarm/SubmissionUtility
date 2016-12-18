@@ -8,6 +8,8 @@ from filemanager import FileManager
 from navigation import prev_step, next_step
 from settings import CLIENT_FILE, APP_FOLDER, CLIENT_ID, CLIENT_SECRET, \
     GRAND_TYPE_PASSWORD, GRAND_TYPE_CREDENTIALS, STEPIK_HOST
+from stepik.models.course import Course
+from stepik.models.stepik import Stepik
 from user import User
 from utils import exit_util
 
@@ -196,4 +198,32 @@ def text():
 
     html = step['steps'][0]['block']['text']
     click.secho(html2text.html2text(html))
+
+
+@main.command()
+def courses():
+    """
+    Display enrolled courses list
+    """
+    courses_set = "\n".join(map(str, Stepik.courses_set()))
+    click.secho(courses_set)
+
+
+def validate_id(ctx, param, value):
+    if value < 1:
+        raise click.BadParameter('Should be a positive integer great than zero.')
+    return value
+
+
+@main.command('course')
+@click.argument("course_id", type=click.INT, callback=validate_id)
+def course_cmd(course_id):
+    """
+    About course
+    """
+    user = User()
+    course = Course.get(user, course_id)
+    click.secho(str(course), bold=True)
+    click.secho(html2text.html2text(course.description))
+    click.secho("")
 
