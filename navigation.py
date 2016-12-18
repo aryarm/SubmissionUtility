@@ -1,7 +1,5 @@
-import json
-
 import attempt_cache
-from stepikclient import get_step, get_attempt
+from stepikclient import get_step
 
 FORWARD = 1
 BACK = -1
@@ -27,8 +25,6 @@ def navigate(user, step_type, direction):
             step = get_step(user, steps[step_pos - 1])
         if step_type == "all" or step['steps'][0]['block']['name'] == step_type:
             data['current_position'] = step_pos
-            attempt = get_attempt(user, json.dumps({"attempt": {"step": str(steps[step_pos - 1])}}))
-            data['attempt_id'] = attempt['attempts'][0]['id']
             attempt_cache.set_data(data)
             return True
     return False

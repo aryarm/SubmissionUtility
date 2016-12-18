@@ -4,17 +4,6 @@ from settings import ATTEMPT_FILE
 _file_manager = FileManager()
 
 
-def set_attempt_id(attempt_id):
-    data = _file_manager.read_json(ATTEMPT_FILE)
-    data['attempt_id'] = attempt_id
-    _file_manager.write_json(ATTEMPT_FILE, data)
-
-
-def get_attempt_id():
-    file = _file_manager.read_json(ATTEMPT_FILE)
-    return file['attempt_id']
-
-
 def clear():
     _file_manager.write_json(ATTEMPT_FILE, {})
 
