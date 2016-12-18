@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 import click
 import html2text
+from models.lesson import Lesson
+from models.section import Section
+from models.course import Course
 
 import attempt_cache
 import stepikclient
 from filemanager import FileManager
 from navigation import prev_step, next_step
 from settings import CLIENT_FILE, APP_FOLDER, CLIENT_ID, CLIENT_SECRET, \
-    GRAND_TYPE_PASSWORD, GRAND_TYPE_CREDENTIALS, STEPIK_HOST
-from stepik.models.course import Course
-from stepik.models.stepik import Stepik
+    GRAND_TYPE_PASSWORD, STEPIK_HOST
 from user import User
 from utils import exit_util
 
@@ -37,34 +38,6 @@ def main():
         user.clear()
         user.save()
         attempt_cache.clear()
-
-
-@main.command()
-def init():
-    """
-    Initializes utility: entering client_id and client_secret
-    """
-    click.echo("Before using, create new Application on https://stepik.org/oauth2/applications/")
-    click.secho("Client type - Confidential, Authorization grant type - Client credentials.", fg="red", bold=True)
-
-    try:
-        user = User()
-        user.grand_type = GRAND_TYPE_CREDENTIALS
-
-        click.secho("Enter your Client id:", bold=True)
-        client_id = input()
-        click.secho("Enter your Client secret:", bold=True)
-        client_secret = input()
-
-        user.client_id = client_id
-        user.secret = client_secret
-
-        stepikclient.check_user(user)
-
-        user.save()
-    except Exception:
-        exit_util("Enter right Client id and Client secret")
-    click.secho("Submitter was inited successfully!", fg="green", bold=True)
 
 
 @main.command()
@@ -130,8 +103,8 @@ def lang():
     click.echo("")
 
 
-@main.command()
-def next():
+@main.command("next")
+def next_cmd():
     """
     Switches to the next code challenge in the lesson
     """
@@ -162,9 +135,9 @@ def prev():
     click.secho(message, bold=True, fg=color)
 
 
-@main.command()
+@main.command("type")
 @click.argument("step_type")
-def type(step_type="code"):
+def type_cmd(step_type="code"):
     """
     Filter for step types (default="code")
     """
@@ -205,7 +178,7 @@ def courses():
     """
     Display enrolled courses list
     """
-    courses_set = "\n".join(map(str, Stepik.courses_set()))
+    courses_set = "\n".join(map(str, Course.all()))
     click.secho(courses_set)
 
 
@@ -225,5 +198,44 @@ def course_cmd(course_id):
     course = Course.get(user, course_id)
     click.secho(str(course), bold=True)
     click.secho(html2text.html2text(course.description))
-    click.secho("")
+    click.secho("In order to see the content of the course, use the command: content course <id>")
 
+_ENTITIES = {'course': Course, 'section': Section, 'lesson': Lesson}
+
+
+def validate_entity(ctx, param, value):
+    value = str(value).lower()
+    if value not in _ENTITIES:
+        raise click.BadParameter('Should be one from "course", "section", "lesson"')
+    return value
+
+
+@main.command('content')
+@click.argument("entity", type=click.STRING, callback=validate_entity)
+@click.argument("entity_id", type=click.INT, callback=validate_id)
+def content_cmd(entity, entity_id):
+    """
+    Content Course, Section and Lesson
+
+    Format:
+
+        content course <course_id>
+
+        content section <section_id>
+
+        content lesson <lesson_id>
+
+    """
+
+    if entity not in _ENTITIES:
+        return
+
+    user = User()
+
+    entity_class = _ENTITIES[entity]
+
+    entity = entity_class.get(user, entity_id)
+
+    click.secho(str(entity), bold=True)
+    items = "\n".join(map(str, entity.items()))
+    click.secho(items)
