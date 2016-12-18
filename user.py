@@ -6,7 +6,11 @@ class User:
     file_manager = FileManager()
 
     def __init__(self):
-        data = self.file_manager.read_json(CLIENT_FILE)
+        try:
+            data = self.file_manager.read_json(CLIENT_FILE)
+        except FileNotFoundError:
+            data = {}
+
         User.check(data)
 
         self.client_id = data['client_id']
@@ -25,7 +29,7 @@ class User:
         if 'client_id' not in data:
             data['client_id'] = CLIENT_ID
         if 'client_secret' not in data:
-            data['client_id'] = CLIENT_SECRET
+            data['client_secret'] = CLIENT_SECRET
         if 'grand_type' not in data:
             data['grand_type'] = GRAND_TYPE_PASSWORD
         if 'username' not in data:
