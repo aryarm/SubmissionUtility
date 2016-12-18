@@ -1,10 +1,17 @@
 import json
+import os
 
+import click
 import requests
+import time
+
+import attempt_cache
 import attempt_cache as attempt_storage
+from filemanager import FileManager
+from languagemanager import LanguageManager
 
 from settings import STEPIK_API_URL
-from utils import exit_util
+from utils import exit_util, get_lesson_id, get_step_id
 
 
 def request(request_type, link, **kwargs):
@@ -94,22 +101,8 @@ def get_attempt(user, data):
     return resp.json()
 
 
-def get_attempt_id(user, lesson, step_id):
+def get_attempt_id(user, step_id):
     # auth_user(user)
-
-    steps = None
-    try:
-        steps = lesson['lessons'][0]['steps']
-    except Exception:
-        exit_util("Didn't receive such lesson.")
-    if len(steps) < step_id or step_id < 1:
-        exit_util("Too few steps in the lesson.")
-
-    data = attempt_storage.get_data()
-    data['steps'] = steps
-    data['current_position'] = step_id
-    step_id = steps[step_id - 1]
-    attempt_storage.set_data(data)
 
     attempt = get_attempt(user, json.dumps({"attempt": {"step": str(step_id)}}))
     try:
@@ -140,3 +133,91 @@ def get_languages_list(user):
         exit_util('Type step is not code.')
     languages = block['options']['code_templates']
     return [lang for lang in languages]
+
+
+def evaluate(user, attempt_id):
+    click.secho("Evaluating", bold=True, fg='white')
+    time_out = 0.1
+    while True:
+        result = get_submission(user, attempt_id)
+        status = result['submissions'][0]['status']
+        hint = result['submissions'][0]['hint']
+        if status != 'evaluation':
+            break
+        click.echo("..", nl=False)
+        time.sleep(time_out)
+        time_out += time_out
+    click.echo("")
+    click.secho("You solution is {}\n{}".format(status, hint), fg=['red', 'green'][status == 'correct'], bold=True)
+
+
+def submit_code(user, code, lang=None):
+    file_manager = FileManager()
+
+    if not file_manager.is_local_file(code):
+        exit_util("FIle {} not found".format(code))
+    file_name = code
+    code = "".join(open(code).readlines())
+    url = STEPIK_API_URL + "/submissions"
+    current_time = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
+
+    attempt_id = None
+    try:
+        step_id = attempt_cache.get_step_id()
+        attempt_id = get_attempt_id(user, step_id)
+    except Exception:
+        pass
+    if attempt_id is None:
+        exit_util("Please, set the step link!")
+    available_languages = get_languages_list(user)
+    if lang in available_languages:
+        language = lang
+    else:
+        language = LanguageManager().programming_language.get(os.path.splitext(file_name)[1])
+    if language is None:
+        exit_util("Doesn't correct extension for programme.")
+    if language not in available_languages:
+        exit_util("This language not available for current step.")
+    submission = {
+        "submission":
+            {
+                "time": current_time,
+                "reply":
+                    {
+                        "code": code,
+                        "language": language
+                    },
+                "attempt": attempt_id
+            }
+    }
+    submit = get_submit(user, url, json.dumps(submission))
+    evaluate(user, submit['submissions'][0]['id'])
+
+
+def set_step(user, step_url):
+    click.secho("\nSetting connection to the page..", bold=True)
+    lesson_id = get_lesson_id(step_url)
+    step_id = get_step_id(step_url)
+
+    if lesson_id is None or not step_id:
+        exit_util("The link is incorrect.")
+
+    lesson = get_lesson(user, lesson_id)
+
+    steps = None
+    try:
+        steps = lesson['lessons'][0]['steps']
+    except Exception:
+        exit_util("Didn't receive such lesson.")
+    if len(steps) < step_id or step_id < 1:
+        exit_util("Too few steps in the lesson.")
+
+    data = attempt_storage.get_data()
+    data['steps'] = steps
+    data['current_position'] = step_id
+    attempt_storage.set_data(data)
+    try:
+        attempt_cache.set_lesson_id(lesson_id)
+    except Exception:
+        exit_util("You do not have permission to perform this action.")
+    click.secho("Connecting completed!", fg="green", bold=True)

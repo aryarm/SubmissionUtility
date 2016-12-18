@@ -1,99 +1,15 @@
 #!/usr/bin/env python
-import json
-import os
-import time
-
 import click
 import html2text
 
 import attempt_cache
 import stepikclient
 from filemanager import FileManager
-from languagemanager import LanguageManager
 from navigation import prev_step, next_step
-from settings import CLIENT_FILE, APP_FOLDER, STEPIK_API_URL, CLIENT_ID, CLIENT_SECRET, \
+from settings import CLIENT_FILE, APP_FOLDER, CLIENT_ID, CLIENT_SECRET, \
     GRAND_TYPE_PASSWORD, GRAND_TYPE_CREDENTIALS, STEPIK_HOST
 from user import User
-from utils import exit_util, get_lesson_id, get_step_id
-
-
-def set_step(user, step_url):
-    click.secho("\nSetting connection to the page..", bold=True)
-    lesson_id = get_lesson_id(step_url)
-    step_id = get_step_id(step_url)
-
-    if lesson_id is None or not step_id:
-        exit_util("The link is incorrect.")
-
-    lesson = stepikclient.get_lesson(user, lesson_id)
-    attempt_id = stepikclient.get_attempt_id(user, lesson, step_id)
-    try:
-        attempt_cache.set_attempt_id(attempt_id)
-        attempt_cache.set_lesson_id(lesson_id)
-    except Exception:
-        exit_util("You do not have permission to perform this action.")
-    click.secho("Connecting completed!", fg="green", bold=True)
-
-
-def evaluate(user, attempt_id):
-    click.secho("Evaluating", bold=True, fg='white')
-    time_out = 0.1
-    while True:
-        result = stepikclient.get_submission(user, attempt_id)
-        status = result['submissions'][0]['status']
-        hint = result['submissions'][0]['hint']
-        if status != 'evaluation':
-            break
-        click.echo("..", nl=False)
-        time.sleep(time_out)
-        time_out += time_out
-    click.echo("")
-    click.secho("You solution is {}\n{}".format(status, hint), fg=['red', 'green'][status == 'correct'], bold=True)
-
-
-def submit_code(user, code, lang=None):
-    file_manager = FileManager()
-
-    if not file_manager.is_local_file(code):
-        exit_util("FIle {} not found".format(code))
-    file_name = code
-    code = "".join(open(code).readlines())
-    url = STEPIK_API_URL + "/submissions"
-    current_time = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
-
-    attempt_id = None
-    try:
-        lesson = stepikclient.get_lesson(user, attempt_cache.get_lesson_id())
-        step_pos = attempt_cache.get_current_position()
-        attempt_id = stepikclient.get_attempt_id(user, lesson, step_pos)
-        attempt_cache.set_attempt_id(attempt_id)
-    except Exception:
-        pass
-    if attempt_id is None:
-        exit_util("Please, set the step link!")
-    available_languages = stepikclient.get_languages_list(user)
-    if lang in available_languages:
-        language = lang
-    else:
-        language = LanguageManager().programming_language.get(os.path.splitext(file_name)[1])
-    if language is None:
-        exit_util("Doesn't correct extension for programme.")
-    if language not in available_languages:
-        exit_util("This language not available for current step.")
-    submission = {
-        "submission":
-            {
-                "time": current_time,
-                "reply":
-                    {
-                        "code": code,
-                        "language": language
-                    },
-                "attempt": attempt_id
-            }
-    }
-    submit = stepikclient.get_submit(user, url, json.dumps(submission))
-    evaluate(user, submit['submissions'][0]['id'])
+from utils import exit_util
 
 
 @click.group()
@@ -188,7 +104,7 @@ def step(link=None):
     """
     if link is not None:
         user = User()
-        set_step(user, link)
+        stepikclient.set_step(user, link)
 
 
 @main.command()
@@ -200,7 +116,7 @@ def submit(solution=None, l=None):
     """
     if solution is not None:
         user = User()
-        submit_code(user, solution, l)
+        stepikclient.submit_code(user, solution, l)
 
 
 @main.command()
@@ -278,7 +194,6 @@ def text():
     """
     Display current step as text
     """
-
     user = User()
 
     step_id = attempt_cache.get_step_id()
