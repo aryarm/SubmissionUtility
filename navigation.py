@@ -1,5 +1,5 @@
 import attempt_cache
-from client.stepikclient import get_step
+from models.lesson import Lesson
 
 FORWARD = 1
 BACK = -1
@@ -7,8 +7,12 @@ BACK = -1
 
 def navigate(user, step_type, direction):
     data = attempt_cache.get_data()
-    steps = data['steps']
-    position = data['current_position']
+    try:
+        steps = data['steps']
+        position = data['current_position']
+        lesson_id = data['lesson_id']
+    except KeyError:
+        return False
 
     if direction < 0:
         direction = -1
@@ -19,11 +23,20 @@ def navigate(user, step_type, direction):
         start = position + 1
         stop = len(steps) + 1
 
+    if (position + direction) > len(steps) or (position + direction) < 1:
+        return False
+
+    if step_type == "all":
+        data['current_position'] = position + direction
+        attempt_cache.set_data(data)
+        return True
+
+    lesson = Lesson.get(user, lesson_id)
+
+    steps = lesson.items()
     for step_pos in range(start, stop, direction):
-        step = None
-        if step_type != "all":
-            step = get_step(user, steps[step_pos - 1])
-        if step_type == "all" or step['steps'][0]['block']['name'] == step_type:
+        step = steps[step_pos - 1]
+        if step.block['name'] == step_type:
             data['current_position'] = step_pos
             attempt_cache.set_data(data)
             return True
