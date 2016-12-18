@@ -1,5 +1,5 @@
 import attempt_cache
-from stepikclient import get_step
+from client.stepikclient import get_step
 
 FORWARD = 1
 BACK = -1

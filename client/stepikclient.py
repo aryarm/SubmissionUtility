@@ -7,10 +7,11 @@ import time
 
 import attempt_cache
 import attempt_cache as attempt_storage
+from client.consts import STEPIK_API_URL, LESSONS_PK, SUBMISSIONS_PK, STEPS_PK, COURSES_PK, ATTEMPTS, SUBMISSIONS, \
+    SECTIONS, UNITS, SECTIONS_PK, LESSONS, STEPS
 from filemanager import FileManager
 from languagemanager import LanguageManager
 
-from settings import STEPIK_API_URL
 from utils import exit_util, get_lesson_id, get_step_id, prepare_ids
 
 
@@ -47,7 +48,7 @@ def check_user(user):
         user.access_token = (resp.json())['access_token']
         user.refresh_token = (resp.json())['refresh_token']
         user.save()
-    except Exception:
+    except AssertionError:
         exit_util("Check your authentication.")
 
 
@@ -75,38 +76,44 @@ def refresh_client(user):
     return True
 
 
+def get_entity(user, entity_id, url_template):
+    entity = get_request(url_template.format(entity_id), headers=get_headers(user))
+    return entity.json()
+
+
+def get_course(user, course_id):
+    return get_entity(user, course_id, COURSES_PK)
+
+
+def get_section(user, section_id):
+    return get_entity(user, section_id, SECTIONS_PK)
+
+
 def get_lesson(user, lesson_id):
-    lesson = get_request(STEPIK_API_URL + "/lessons/{}".format(lesson_id), headers=get_headers(user))
-    return lesson.json()
+    return get_entity(user, lesson_id, LESSONS_PK)
 
 
-def get_submission(user, attempt_id):
-    resp = get_request(STEPIK_API_URL + "/submissions/{}".format(attempt_id), headers=get_headers(user))
-    return resp.json()
+def get_submission(user, submission_id):
+    return get_entity(user, submission_id, SUBMISSIONS_PK)
 
 
-def get_attempt(user, data):
-    resp = requests.post(STEPIK_API_URL + "/attempts", data=data, headers=get_headers(user))
-    return resp.json()
+def get_step(user, step_id):
+    return get_entity(user, step_id, STEPS_PK)
 
 
 def get_attempt_id(user, step_id):
-    attempt = get_attempt(user, json.dumps({"attempt": {"step": str(step_id)}}))
+    data = json.dumps({"attempt": {"step": str(step_id)}})
+    attempt = requests.post(ATTEMPTS, data=data, headers=get_headers(user)).json()
     try:
         return attempt['attempts'][0]['id']
-    except Exception:
+    except KeyError:
         exit_util("Wrong attempt")
     return None
 
 
-def get_submit(user, url, data):
-    resp = post_request(url, data=data, headers=get_headers(user))
+def post_submit(user, data):
+    resp = post_request(SUBMISSIONS, data=data, headers=get_headers(user))
     return resp.json()
-
-
-def get_step(user, step_id):
-    step = get_request(STEPIK_API_URL + "/steps/{}".format(step_id), headers=get_headers(user))
-    return step.json()
 
 
 def get_languages_list(user):
@@ -135,14 +142,13 @@ def evaluate(user, attempt_id):
     click.secho("You solution is {}\n{}".format(status, hint), fg=['red', 'green'][status == 'correct'], bold=True)
 
 
-def submit_code(user, code, lang=None):
+def submit_code(user, filename, lang=None):
     file_manager = FileManager()
 
-    if not file_manager.is_local_file(code):
-        exit_util("FIle {} not found".format(code))
-    file_name = code
-    code = "".join(open(code).readlines())
-    url = STEPIK_API_URL + "/submissions"
+    if not file_manager.is_local_file(filename):
+        exit_util("File {} not found".format(filename))
+    code = "".join(open(filename).readlines())
+
     current_time = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
     attempt_id = None
@@ -157,7 +163,7 @@ def submit_code(user, code, lang=None):
     if lang in available_languages:
         language = lang
     else:
-        language = LanguageManager().programming_language.get(os.path.splitext(file_name)[1])
+        language = LanguageManager().programming_language.get(os.path.splitext(filename)[1])
     if language is None:
         exit_util("Doesn't correct extension for programme.")
     if language not in available_languages:
@@ -174,7 +180,8 @@ def submit_code(user, code, lang=None):
                 "attempt": attempt_id
             }
     }
-    submit = get_submit(user, url, json.dumps(submission))
+
+    submit = post_submit(user, json.dumps(submission))
     evaluate(user, submit['submissions'][0]['id'])
 
 
@@ -212,35 +219,23 @@ def get_courses(user, **kwargs):
     return courses.json()
 
 
-def get_course(user, course_id):
-    courses = get_request(STEPIK_API_URL + "/courses/{}".format(course_id), headers=get_headers(user))
-    return courses.json()
+def get_entities_with_ids(user, ids, page, url):
+    url = url + "?" + prepare_ids(ids) + '&page=' + str(page)
+    entities = get_request(url, headers=get_headers(user))
+    return entities.json()
 
 
 def get_sections(user, ids, page):
-    url = STEPIK_API_URL + "/sections/?" + prepare_ids(ids) + '&page=' + str(page)
-    courses = get_request(url, headers=get_headers(user))
-    return courses.json()
+    return get_entities_with_ids(user, ids, page, SECTIONS)
 
 
 def get_units(user, ids, page):
-    url = STEPIK_API_URL + "/units/?" + prepare_ids(ids) + '&page=' + str(page)
-    units = get_request(url, headers=get_headers(user))
-    return units.json()
-
-
-def get_section(user, section_id):
-    courses = get_request(STEPIK_API_URL + "/sections/{}".format(section_id), headers=get_headers(user))
-    return courses.json()
+    return get_entities_with_ids(user, ids, page, UNITS)
 
 
 def get_lessons(user, ids, page):
-    url = STEPIK_API_URL + "/lessons/?" + prepare_ids(ids) + '&page=' + str(page)
-    lessons = get_request(url, headers=get_headers(user))
-    return lessons.json()
+    return get_entities_with_ids(user, ids, page, LESSONS)
 
 
 def get_steps(user, ids, page):
-    url = STEPIK_API_URL + "/steps/?" + prepare_ids(ids) + '&page=' + str(page)
-    lessons = get_request(url, headers=get_headers(user))
-    return lessons.json()
+    return get_entities_with_ids(user, ids, page, STEPS)

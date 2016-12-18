@@ -1,8 +1,7 @@
+from client import stepikclient
+from models.entity import Entity
 from models.lesson import Lesson
 from models.unit import Unit
-
-import stepikclient
-from models.entity import Entity
 from utils import entities_loader
 
 

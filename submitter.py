@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 import click
 import html2text
-from models.lesson import Lesson
-from models.section import Section
-from models.course import Course
 
 import attempt_cache
-import stepikclient
+from client import stepikclient
+from client.consts import STEPIK_HOST
 from filemanager import FileManager
+from models.course import Course
+from models.lesson import Lesson
+from models.section import Section
 from navigation import prev_step, next_step
 from settings import CLIENT_FILE, APP_FOLDER, CLIENT_ID, CLIENT_SECRET, \
-    GRAND_TYPE_PASSWORD, STEPIK_HOST
+    GRAND_TYPE_PASSWORD
 from user import User
 from utils import exit_util
 

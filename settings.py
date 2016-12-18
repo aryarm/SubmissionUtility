@@ -1,5 +1,3 @@
-STEPIK_HOST = "https://stepik.org/"
-STEPIK_API_URL = STEPIK_HOST + "api"
 APP_FOLDER = ".stepik"
 CLIENT_FILE = APP_FOLDER + "/client_file"
 ATTEMPT_FILE = APP_FOLDER + "/attempt_file"
