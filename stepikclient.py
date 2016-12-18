@@ -205,3 +205,13 @@ def set_step(user, step_url):
     except Exception:
         exit_util("You do not have permission to perform this action.")
     click.secho("Connecting completed!", fg="green", bold=True)
+
+
+def get_courses(user, **kwargs):
+    courses = get_request(STEPIK_API_URL + "/courses/", params=kwargs, headers=get_headers(user))
+    return courses.json()
+
+
+def get_course(user, course_id):
+    courses = get_request(STEPIK_API_URL + "/courses/{}".format(course_id), headers=get_headers(user))
+    return courses.json()
