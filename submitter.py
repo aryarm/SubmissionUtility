@@ -78,13 +78,8 @@ def auth():
         user.client_id = CLIENT_ID
         user.secret = CLIENT_SECRET
 
-        click.secho("Enter your username:", bold=True)
-        username = input()
-        click.secho("Enter your password:", bold=True)
-        password = input()
-
-        user.username = username
-        user.password = password
+        user.username = click.prompt(text="Enter your username")
+        user.password = click.prompt(text="Enter your password", hide_input=True)
 
         stepikclient.check_user(user)
 
