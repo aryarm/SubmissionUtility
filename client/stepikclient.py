@@ -103,12 +103,14 @@ def get_step(user, step_id):
 
 def get_attempt_id(user, step_id):
     data = json.dumps({"attempt": {"step": str(step_id)}})
-    attempt = requests.post(ATTEMPTS, data=data, headers=get_headers(user)).json()
     try:
-        return attempt['attempts'][0]['id']
-    except KeyError:
+        attempt = requests.post(ATTEMPTS, data=data, headers=get_headers(user))
+
+        assert attempt.status_code < 300
+
+        return attempt.json()['attempts'][0]['id']
+    except KeyError or AssertionError:
         exit_util("Wrong attempt")
-    return None
 
 
 def post_submit(user, data):
@@ -118,6 +120,8 @@ def post_submit(user, data):
 
 def get_languages_list(user):
     current_step = attempt_storage.get_step_id()
+    if current_step == 0:
+        exit_util('Set current step.')
     step = get_step(user, current_step)
     block = step['steps'][0]['block']
     if block['name'] != 'code':
@@ -186,7 +190,6 @@ def submit_code(user, filename, lang=None):
 
 
 def set_step(user, step_url):
-    click.secho("\nSetting connection to the page..", bold=True)
     lesson_id = get_lesson_id(step_url)
     step_id = get_step_id(step_url)
 
@@ -209,9 +212,9 @@ def set_step(user, step_url):
     attempt_storage.set_data(data)
     try:
         attempt_cache.set_lesson_id(lesson_id)
-    except Exception:
+    except PermissionError:
         exit_util("You do not have permission to perform this action.")
-    click.secho("Connecting completed!", fg="green", bold=True)
+    click.secho("Setting current step completed!", fg="green", bold=True)
 
 
 def get_courses(user, **kwargs):

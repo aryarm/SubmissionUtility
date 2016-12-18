@@ -10,8 +10,7 @@ from models.course import Course
 from models.lesson import Lesson
 from models.section import Section
 from navigation import prev_step, next_step
-from settings import CLIENT_FILE, APP_FOLDER, CLIENT_ID, CLIENT_SECRET, \
-    GRAND_TYPE_PASSWORD
+from settings import APP_FOLDER, CLIENT_ID, CLIENT_SECRET, GRAND_TYPE_PASSWORD
 from user import User
 from utils import exit_util
 
@@ -28,17 +27,6 @@ def main():
         file_manager.create_dir(APP_FOLDER)
     except OSError:
         exit_util("Can't do anything. Not enough rights to edit folders.")
-    lines = 0
-    try:
-        data = file_manager.read_json(CLIENT_FILE)
-        lines += 1
-    except Exception:
-        pass
-    if lines < 1:
-        user = User()
-        user.clear()
-        user.save()
-        attempt_cache.clear()
 
 
 @main.command()
@@ -109,13 +97,14 @@ def next_cmd():
     """
     Switches to the next code challenge in the lesson
     """
-    message = "Stayed for current step."
-    color = "red"
     user = User()
     if next_step(user, user.step_type):
-        message = "Switched to the next step successful. Current step is {}".format(
-            attempt_cache.get_current_position())
+        current_pos = attempt_cache.get_current_position()
+        message = "Switched to the next step successful. Current step is {}".format(current_pos)
         color = "green"
+    else:
+        message = "Stayed for current step."
+        color = "red"
 
     click.secho(message, bold=True, fg=color)
 
@@ -125,13 +114,14 @@ def prev():
     """
     Switches to the prev code challenge in the lesson
     """
-    message = "Stayed for current step."
-    color = "red"
     user = User()
     if prev_step(user, user.step_type):
-        message = "Switched to the prev step successful. Current step is {}".format(
-            attempt_cache.get_current_position())
+        current_pos = attempt_cache.get_current_position()
+        message = "Switched to the prev step successful. Current step is {}".format(current_pos)
         color = "green"
+    else:
+        message = "Stayed for current step."
+        color = "red"
 
     click.secho(message, bold=True, fg=color)
 
@@ -155,6 +145,9 @@ def current():
     Display the current step link
     """
     lesson_id = attempt_cache.get_lesson_id()
+    if lesson_id is None:
+        exit_util("Set current step")
+
     step_position = attempt_cache.get_current_position()
 
     click.secho(STEPIK_HOST + "lesson/{}/step/{}".format(lesson_id, step_position), bold=True, fg="green")
@@ -168,6 +161,9 @@ def text():
     user = User()
 
     step_id = attempt_cache.get_step_id()
+    if step_id is None:
+        exit_util("Set current step")
+
     step = stepikclient.get_step(user, step_id)
 
     html = step['steps'][0]['block']['text']
@@ -227,7 +223,6 @@ def content_cmd(entity, entity_id):
         content lesson <lesson_id>
 
     """
-
     if entity not in _ENTITIES:
         return
 
