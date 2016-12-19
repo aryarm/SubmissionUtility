@@ -56,9 +56,9 @@ def auth():
     click.secho("Authentication was successfully!", fg="green", bold=True)
 
 
-@main.command()
+@main.command("step")
 @click.argument("link")
-def step(link=None):
+def step_cmd(link=None):
     """
     Setting new step as current target.
     """
@@ -70,13 +70,14 @@ def step(link=None):
 @main.command()
 @click.argument("solution")
 @click.option("-l", help="language")
-def submit(solution=None, l=None):
+@click.option("--step_id", help="step id")
+def submit(solution=None, l=None, step_id=None):
     """
     Submit a solution to stepik system.
     """
     if solution is not None:
         user = User()
-        stepikclient.submit_code(user, solution, l)
+        stepikclient.submit_code(user, solution, l, step_id)
 
 
 @main.command()
@@ -85,8 +86,8 @@ def lang():
     Displays all available languages for current step
     """
     user = User()
-
-    languages = stepikclient.get_languages_list(user)
+    current_step_id = attempt_cache.get_step_id()
+    languages = stepikclient.get_languages_list(user, current_step_id)
     languages.sort()
     click.secho(", ".join(languages), bold=True, nl=False)
 

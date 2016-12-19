@@ -6,7 +6,6 @@ import requests
 import time
 
 import attempt_cache
-import attempt_cache as attempt_storage
 from client.auth import get_headers
 from client.consts import STEPIK_API_URL, LESSONS_PK, SUBMISSIONS_PK, STEPS_PK, COURSES_PK, ATTEMPTS, SUBMISSIONS, \
     SECTIONS, UNITS, SECTIONS_PK, LESSONS, STEPS
@@ -71,11 +70,10 @@ def post_submit(user, data):
     return resp.json()
 
 
-def get_languages_list(user):
-    current_step = attempt_storage.get_step_id()
-    if current_step == 0:
+def get_languages_list(user, step_id):
+    if step_id is None:
         exit_util('Set current step.')
-    step = get_step(user, current_step)
+    step = get_step(user, step_id)
     block = step['steps'][0]['block']
     if block['name'] != 'code':
         exit_util('Type step is not code.')
@@ -99,7 +97,7 @@ def evaluate(user, attempt_id):
     click.secho("You solution is {}\n{}".format(status, hint), fg=['red', 'green'][status == 'correct'], bold=True)
 
 
-def submit_code(user, filename, lang=None):
+def submit_code(user, filename, lang=None, step_id=None):
     file_manager = FileManager()
 
     if not file_manager.is_local_file(filename):
@@ -109,14 +107,14 @@ def submit_code(user, filename, lang=None):
     current_time = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
     attempt_id = None
-    try:
+    if step_id is None:
         step_id = attempt_cache.get_step_id()
+    try:
         attempt_id = get_attempt_id(user, step_id)
     except Exception:
-        pass
-    if attempt_id is None:
         exit_util("Please, set the step link!")
-    available_languages = get_languages_list(user)
+
+    available_languages = get_languages_list(user, step_id)
     if lang in available_languages:
         language = lang
     else:
@@ -159,10 +157,10 @@ def set_step(user, step_url):
     if len(steps) < step_id or step_id < 1:
         exit_util("Too few steps in the lesson.")
 
-    data = attempt_storage.get_data()
+    data = attempt_cache.get_data()
     data['steps'] = steps
     data['current_position'] = step_id
-    attempt_storage.set_data(data)
+    attempt_cache.set_data(data)
     try:
         attempt_cache.set_lesson_id(lesson_id)
     except PermissionError:
