@@ -1,6 +1,6 @@
 import unittest
 
-from utils import get_lesson_id, get_step_id
+from utils import get_lesson_id, get_step_id, prepare_ids
 
 SHORT_LINK = "https://stepik.org/lesson/12752/step/1"
 LARGE_LINK = "https://stepik.org/lesson/Что-такое-Java-откуда-она-взялась-и-зачем-нужна-12752/step/1"
@@ -32,6 +32,20 @@ class Test(unittest.TestCase):
         lesson_id = get_step_id(WRONG_LINK)
         self.assertEqual(lesson_id, 0)
 
+    def test_prepare_ids_blank(self):
+        ids = []
+        params = prepare_ids(ids)
+        self.assertEqual(params, '')
+
+    def test_prepare_ids_one(self):
+        ids = [123]
+        params = prepare_ids(ids)
+        self.assertEqual(params, 'ids[]=123')
+
+    def test_prepare_ids_several(self):
+        ids = [123, 1, 5, 88]
+        params = prepare_ids(ids)
+        self.assertEqual(params, 'ids[]=123&ids[]=1&ids[]=5&ids[]=88')
 
 if __name__ == "__main__":
     unittest.main()
