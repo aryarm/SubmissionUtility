@@ -126,9 +126,10 @@ Usage: submitter [OPTIONS] COMMAND [ARGS]...
 13. Open your text editor and create text. Save it in file.
 14. Submit your text to stepik.org
 
-    `submitter submit <path/to/file/filename> -l language`
+    `submitter submit <path/to/file/filename> -l <language> --step_id <id>`
     
     -l is not necessary, will use a file extension.
+    --step_id is not necessary, will use a current step.
 
 15. Navigate in the current lesson
     
