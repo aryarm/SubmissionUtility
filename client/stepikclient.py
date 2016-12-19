@@ -7,6 +7,7 @@ import time
 
 import attempt_cache
 import attempt_cache as attempt_storage
+from client.auth import get_headers
 from client.consts import STEPIK_API_URL, LESSONS_PK, SUBMISSIONS_PK, STEPS_PK, COURSES_PK, ATTEMPTS, SUBMISSIONS, \
     SECTIONS, UNITS, SECTIONS_PK, LESSONS, STEPS
 from filemanager import FileManager
@@ -32,48 +33,6 @@ def post_request(link, **kwargs):
 
 def get_request(link, **kwargs):
     return request("get", link, **kwargs)
-
-
-def check_user(user, password):
-    try:
-        data = {'grant_type': user.grand_type,
-                'client_id': user.client_id,
-                'secret_id': user.secret,
-                'username': user.username,
-                'password': password}
-        resp = requests.post('https://stepik.org/oauth2/token/', data)
-
-        assert resp.status_code < 300
-
-        user.access_token = (resp.json())['access_token']
-        user.refresh_token = (resp.json())['refresh_token']
-        user.save()
-    except AssertionError:
-        exit_util("Check your authentication.")
-
-
-def get_headers(user):
-    return {'Authorization': 'Bearer ' + user.access_token, "content-type": "application/json"}
-
-
-def refresh_client(user):
-    try:
-        data = {'grant_type': 'refresh_token',
-                'client_id': user.client_id,
-                'secret_id': user.secret,
-                'refresh_token': user.refresh_token}
-
-        resp = requests.post('https://stepik.org/oauth2/token/', data)
-
-        assert resp.status_code < 300
-
-        user.access_token = (resp.json())['access_token']
-        user.refresh_token = (resp.json())['refresh_token']
-        user.save()
-    except Exception:
-        return False
-
-    return True
 
 
 def get_entity(user, entity_id, url_template):
@@ -103,14 +62,8 @@ def get_step(user, step_id):
 
 def get_attempt_id(user, step_id):
     data = json.dumps({"attempt": {"step": str(step_id)}})
-    try:
-        attempt = requests.post(ATTEMPTS, data=data, headers=get_headers(user))
-
-        assert attempt.status_code < 300
-
-        return attempt.json()['attempts'][0]['id']
-    except KeyError or AssertionError:
-        exit_util("Wrong attempt")
+    attempt = post_request(ATTEMPTS, data=data, headers=get_headers(user))
+    return attempt.json()['attempts'][0]['id']
 
 
 def post_submit(user, data):

@@ -4,6 +4,7 @@ import html2text
 
 import attempt_cache
 from client import stepikclient
+from client.auth import auth_user_password
 from client.consts import STEPIK_HOST
 from filemanager import FileManager
 from models.course import Course
@@ -45,7 +46,7 @@ def auth():
         user.username = click.prompt(text="Enter your username")
         password = click.prompt(text="Enter your password", hide_input=True)
 
-        stepikclient.check_user(user, password)
+        auth_user_password(user, password)
 
         user.save()
 
