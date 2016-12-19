@@ -5,14 +5,14 @@ import html2text
 import attempt_cache
 from client import stepikclient
 from client.auth import auth_user_password
-from client.consts import STEPIK_HOST
+from client.consts import STEPIK_HOST, GRAND_TYPE_PASSWORD
 from filemanager import FileManager
 from models.course import Course
 from models.lesson import Lesson
 from models.section import Section
 from models.user import User
 from navigation import prev_step, next_step
-from settings import APP_FOLDER, CLIENT_ID, CLIENT_SECRET, GRAND_TYPE_PASSWORD
+from settings import APP_FOLDER, CLIENT_ID, CLIENT_SECRET
 from utils import exit_util
 
 

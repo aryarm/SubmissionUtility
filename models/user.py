@@ -1,5 +1,6 @@
+from client.consts import GRAND_TYPE_PASSWORD
 from filemanager import FileManager
-from settings import CLIENT_FILE, CLIENT_ID, CLIENT_SECRET, GRAND_TYPE_PASSWORD
+from settings import CLIENT_FILE, CLIENT_ID, CLIENT_SECRET
 
 
 class User:

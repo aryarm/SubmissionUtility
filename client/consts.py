@@ -1,3 +1,6 @@
+GRAND_TYPE_PASSWORD = "password"
+GRAND_TYPE_CREDENTIALS = "client_credentials"
+
 STEPIK_HOST = "https://stepik.org/"
 STEPIK_API_URL = STEPIK_HOST + "api"
 
