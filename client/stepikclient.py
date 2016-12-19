@@ -34,13 +34,13 @@ def get_request(link, **kwargs):
     return request("get", link, **kwargs)
 
 
-def check_user(user):
+def check_user(user, password):
     try:
         data = {'grant_type': user.grand_type,
                 'client_id': user.client_id,
                 'secret_id': user.secret,
                 'username': user.username,
-                'password': user.password}
+                'password': password}
         resp = requests.post('https://stepik.org/oauth2/token/', data)
 
         assert resp.status_code < 300

@@ -16,7 +16,6 @@ class User:
         self.client_id = data['client_id']
         self.secret = data['client_secret']
         self.username = data['username']
-        self.password = ''
         self.grand_type = data['grand_type']
         self.access_token = data['access_token']
         self.refresh_token = data['refresh_token']
@@ -59,7 +58,6 @@ class User:
         self.client_id = ''
         self.secret = ''
         self.username = ''
-        self.password = ''
         self.grand_type = ''
         self.access_token = ''
         self.refresh_token = ''

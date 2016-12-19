@@ -43,9 +43,9 @@ def auth():
         user.secret = CLIENT_SECRET
 
         user.username = click.prompt(text="Enter your username")
-        user.password = click.prompt(text="Enter your password", hide_input=True)
+        password = click.prompt(text="Enter your password", hide_input=True)
 
-        stepikclient.check_user(user)
+        stepikclient.check_user(user, password)
 
         user.save()
 
