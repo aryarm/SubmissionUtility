@@ -1,7 +1,7 @@
 from client import stepikclient
 from models.entity import Entity
 from models.section import Section
-from user import User
+from models.user import User
 from utils import entities_loader, all_entities_loader
 
 
