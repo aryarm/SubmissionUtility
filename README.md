@@ -1,6 +1,35 @@
 # stepik-cli
 A command line interface for [the Stepik API](https://stepik.org/api/docs)
 
+## Commands
+```
+$ stepik --help
+Usage: stepik [OPTIONS] COMMAND [ARGS]...
+
+  The (unofficial) Stepik CLI for students
+
+  A command line tool for submitting solutions to stepik.org
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  auth     Authentication using OAuth2 client credentials
+  content  View the content of a course, section, or lesson by its ID.
+  course   Switch to the course that has the provided course ID.
+  courses  Display a list of your enrolled courses and their course IDs.
+  current  Display the URL and step ID of the current step.
+  dataset  Attempt a dataset challenge.
+  lang     Lists the available programming languages for the current step.
+  next     Navigate to the next step in a course.
+  prev     Navigate to the previous step in a course.
+  step     Navigate the current position to the step at the provided URL.
+  submit   Submit a solution to stepik.
+  text     Display the contents of the current step.
+  type     Set a current step type
+```
+
 ## Installation
 With `conda`:
 ```
@@ -114,35 +143,6 @@ stepik lang
 
 ## Help
 Every command in the CLI has a `--help` argument with more detailed descriptions.
-
-## Available commands
-```
-$ stepik --help
-Usage: stepik [OPTIONS] COMMAND [ARGS]...
-
-  The (unofficial) Stepik CLI for students
-
-  A command line tool for submitting solutions to stepik.org
-
-Options:
-  --version  Show the version and exit.
-  --help     Show this message and exit.
-
-Commands:
-  auth     Authentication using OAuth2 client credentials
-  content  View the content of a course, section, or lesson by its ID.
-  course   Switch to the course that has the provided course ID.
-  courses  Display a list of your enrolled courses and their course IDs.
-  current  Display the URL and step ID of the current step.
-  dataset  Attempt a dataset challenge.
-  lang     Lists the available programming languages for the current step.
-  next     Navigate to the next step in a course.
-  prev     Navigate to the previous step in a course.
-  step     Navigate the current position to the step at the provided URL.
-  submit   Submit a solution to stepik.
-  text     Display the contents of the current step.
-  type     Set a current step type
-```
 
 ## Bugs, Contributions, and Suggestions
 I welcome reports of bugs and/or suggestions for improvements to this software within Github's issue tab.
