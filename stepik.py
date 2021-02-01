@@ -35,7 +35,7 @@ def main():
 @main.command()
 def auth():
     """
-    Authentication using username and password
+    Authentication using OAuth2 client credentials
     """
     click.echo("Enter your registration info from https://stepik.org/oauth2/applications/")
 
