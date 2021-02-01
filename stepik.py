@@ -22,14 +22,14 @@ from utils import exit_util
 @click.version_option()
 def main():
     """
-    Submitter 0.3\n
-    Tools for submitting solutions to stepik.org
+    The (unofficial) Stepik CLI for students\n
+    A command line tool for submitting solutions to stepik.org
     """
     file_manager = FileManager()
     try:
         file_manager.create_dir(APP_FOLDER)
     except OSError:
-        exit_util("Can't do anything. Not enough rights to edit folders.")
+        exit_util("Can't do anything. Insufficient permissions to folders.")
 
 
 @main.command()
@@ -60,7 +60,7 @@ def auth():
 @click.argument("link")
 def step_cmd(link=None):
     """
-    Setting new step as current target.
+    Navigate the current position to the step at the provided URL.
     """
     if link is not None:
         user = User()
@@ -72,7 +72,7 @@ def step_cmd(link=None):
 @click.option("--attempt_id", help="attempt id")
 def dataset(dataset_path, step_id=None, attempt_id=None):
     """
-    Attempt a dataset challenge.
+    Attempt a dataset challenge. Write the downloaded dataset to the provided path.
     """
     user = User()
     attempt = stepikclient.download_dataset(user, dataset_path, step_id, attempt_id)
@@ -81,12 +81,12 @@ def dataset(dataset_path, step_id=None, attempt_id=None):
 
 @main.command()
 @click.argument("solution")
-@click.option("-l", help="language")
+@click.option("-l", help="programming language")
 @click.option("--step-id", help="step id")
 @click.option("--attempt-id", help="attempt id")
 def submit(solution=None, l=None, step_id=None, attempt_id=None):
     """
-    Submit a solution to stepik.\n
+    Submit a solution to stepik. Use the contents of the provided file path.\n
     Specify the programming language via the -l option if your submission is code.\n
     If you are NOT submitting the solution to a dataset challenge, specify "text" to -l
     """
@@ -98,7 +98,8 @@ def submit(solution=None, l=None, step_id=None, attempt_id=None):
 @main.command()
 def lang():
     """
-    Displays all available languages for current step
+    Lists the available programming languages for the current step.\n
+    Assumes the current step has a coding challenge.
     """
     user = User()
     current_step_id = attempt_cache.get_step_id()
@@ -112,7 +113,9 @@ def lang():
 @main.command("next")
 def next_cmd():
     """
-    Switches to the next code challenge in the lesson
+    Navigate to the next step in a course.\n
+    For the best navigation experience, you should create a course cache using the "cache" command before using this command.\n
+    Steps will be filtered according to the current step type. You can use the "type" command to change this.\n
     """
     user = User()
     if next_step(user, user.step_type):
@@ -131,7 +134,9 @@ def next_cmd():
 @main.command()
 def prev():
     """
-    Switches to the prev code challenge in the lesson
+    Navigate to the previous step in a course.\n
+    For the best navigation experience, you should create a course cache using the "cache" command before using this command.\n
+    Steps will be filtered according to the current step type. You can use the "type" command to change this.\n
     """
     user = User()
     if prev_step(user, user.step_type):
@@ -151,7 +156,8 @@ def prev():
 @click.argument("step_type", type=click.Choice(['all', 'code', 'text', 'dataset'], case_sensitive=False), default='dataset')
 def type_cmd(step_type="dataset"):
     """
-    Filter for steps of the provided type
+    Set a current step type.\n
+    When navigating using the "next" or "prev" commands, any steps that are not of this type will be skipped.
     """
     user = User()
     user.step_type = step_type
@@ -179,13 +185,13 @@ def current():
 @main.command()
 def text():
     """
-    Display current step as text
+    Display the contents of the current step.
     """
     user = User()
 
     step_id = attempt_cache.get_step_id()
     if step_id is None:
-        exit_util("Set current step")
+        exit_util("You should first set the current step using the 'step' command.")
 
     step = stepikclient.get_step(user, step_id)
 
@@ -196,7 +202,7 @@ def text():
 @main.command()
 def courses():
     """
-    Display enrolled courses list
+    Display a list of your enrolled courses and their course IDs.
     """
     courses_set = "\n".join(map(str, Course.all()))
     click.secho(courses_set)
@@ -212,7 +218,7 @@ def validate_id(ctx, param, value):
 @click.argument("course_id", type=click.INT, callback=validate_id)
 def course_cmd(course_id):
     """
-    About course
+    Describe the course that has the provided course ID.
     """
     user = User()
     course = Course.get(user, course_id)
@@ -235,15 +241,11 @@ def validate_entity(ctx, param, value):
 @click.argument("entity_id", type=click.INT, callback=validate_id)
 def content_cmd(entity, entity_id):
     """
-    Content Course, Section and Lesson
-
-    Format:
-
-        content course <course_id>
-
-        content section <section_id>
-
-        content lesson <lesson_id>
+    View the content of a course, section, or lesson by its ID.\n
+    Format:\n
+        content course <course_id>\n
+        content section <section_id>\n
+        content lesson <lesson_id>\n
 
     """
     if entity not in _ENTITIES:
@@ -282,7 +284,7 @@ def course_cache(course_id, cache_path=COURSE_CACHE_FILE):
 @click.argument("cache_path", type=Path)
 def set_course_cache(cache_path):
     """
-    Replace the internal course cache with a user-provided one
+    Replace the internal course cache with the provided one.
     """
     cache = CourseCache(cache_path=cache_path)
     cache.load()
@@ -294,3 +296,4 @@ def set_course_cache(cache_path):
         click.secho("Unable to load course. Check to make sure the authenticated user has permission", bold=True, fg='color')
     cache.cache_path = COURSE_CACHE_FILE
     cache.save()
+
