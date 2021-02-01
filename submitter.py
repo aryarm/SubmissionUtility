@@ -2,17 +2,19 @@
 import click
 import html2text
 
+from pathlib import Path
 import attempt_cache
+from course_cache import CourseCache
 from client import stepikclient
 from client.auth import auth_user_password
-from client.consts import STEPIK_HOST, GRAND_TYPE_PASSWORD
+from client.consts import STEPIK_HOST, GRAND_TYPE_CREDENTIALS
 from filemanager import FileManager
 from models.course import Course
 from models.lesson import Lesson
 from models.section import Section
 from models.user import User
-from navigation import prev_step, next_step
-from settings import APP_FOLDER, CLIENT_ID, CLIENT_SECRET
+from navigation import prev_step, next_step, create_course_cache
+from settings import APP_FOLDER, COURSE_CACHE_FILE, CLIENT_ID, CLIENT_SECRET
 from utils import exit_util
 
 
@@ -20,7 +22,7 @@ from utils import exit_util
 @click.version_option()
 def main():
     """
-    Submitter 0.3
+    Submitter 0.3\n
     Tools for submitting solutions to stepik.org
     """
     file_manager = FileManager()
@@ -35,25 +37,23 @@ def auth():
     """
     Authentication using username and password
     """
-    click.echo("Before using, register on https://stepik.org/")
+    click.echo("Enter your registration info from https://stepik.org/oauth2/applications/")
 
     try:
         user = User()
-        user.grand_type = GRAND_TYPE_PASSWORD
-        user.client_id = CLIENT_ID
-        user.secret = CLIENT_SECRET
+        user.grand_type = GRAND_TYPE_CREDENTIALS
 
-        user.username = click.prompt(text="Enter your username")
-        password = click.prompt(text="Enter your password", hide_input=True)
-
-        auth_user_password(user, password)
-
+        if not (CLIENT_ID and CLIENT_SECRET):
+            user.client_id = click.prompt(text="Enter your client ID")
+            user.secret = click.prompt(text="Enter your client secret")
+            click.secho("Authenticating...")
+        auth_user_password(user)
         user.save()
 
     except Exception as e:
-        exit_util("Enter right username and password" + str(e))
+        exit_util("Error: you should double-check that your client ID and client secret are correct." + str(e))
 
-    click.secho("Authentication was successfully!", fg="green", bold=True)
+    click.secho("Authentication was successfull!", fg="green", bold=True)
 
 
 @main.command("step")
@@ -66,18 +66,33 @@ def step_cmd(link=None):
         user = User()
         stepikclient.set_step(user, link)
 
+@main.command()
+@click.argument("dataset-path", type=Path)
+@click.option("--step_id", help="step id")
+@click.option("--attempt_id", help="attempt id")
+def dataset(dataset_path, step_id=None, attempt_id=None):
+    """
+    Attempt a dataset challenge.
+    """
+    user = User()
+    attempt = stepikclient.download_dataset(user, dataset_path, step_id, attempt_id)
+    click.secho(str(attempt), bold=True, fg='green')
+
 
 @main.command()
 @click.argument("solution")
 @click.option("-l", help="language")
-@click.option("--step_id", help="step id")
-def submit(solution=None, l=None, step_id=None):
+@click.option("--step-id", help="step id")
+@click.option("--attempt-id", help="attempt id")
+def submit(solution=None, l=None, step_id=None, attempt_id=None):
     """
-    Submit a solution to stepik system.
+    Submit a solution to stepik.\n
+    Specify the programming language via the -l option if your submission is code.\n
+    If you are NOT submitting the solution to a dataset challenge, specify "text" to -l
     """
     if solution is not None:
         user = User()
-        stepikclient.submit_code(user, solution, l, step_id)
+        stepikclient.submit_code(user, solution, l, step_id, attempt_id)
 
 
 @main.command()
@@ -101,11 +116,13 @@ def next_cmd():
     """
     user = User()
     if next_step(user, user.step_type):
+        current_lesson = attempt_cache.get_lesson_id()
         current_pos = attempt_cache.get_current_position()
-        message = "Switched to the next step successful. Current step is {}".format(current_pos)
+        message = "Switched to lesson {}, step {}".format(current_lesson, current_pos)
         color = "green"
     else:
-        message = "Stayed for current step."
+        message = "Unable to switch to next step in this lesson."
+        message += "\nIf you would like to proceed to the next lesson, check that you've created a course cache using the cache command."
         color = "red"
 
     click.secho(message, bold=True, fg=color)
@@ -118,21 +135,23 @@ def prev():
     """
     user = User()
     if prev_step(user, user.step_type):
+        current_lesson = attempt_cache.get_lesson_id()
         current_pos = attempt_cache.get_current_position()
-        message = "Switched to the prev step successful. Current step is {}".format(current_pos)
+        message = "Switched to lesson {}, step {}".format(current_lesson, current_pos)
         color = "green"
     else:
-        message = "Stayed for current step."
+        message = "Unable to switch to previous step in this lesson."
+        message += "\nIf you would like to proceed to the previous lesson, check that you've created a course cache using the 'cache' command."
         color = "red"
 
     click.secho(message, bold=True, fg=color)
 
 
 @main.command("type")
-@click.argument("step_type")
-def type_cmd(step_type="code"):
+@click.argument("step_type", type=click.Choice(['all', 'code', 'text', 'dataset'], case_sensitive=False), default='dataset')
+def type_cmd(step_type="dataset"):
     """
-    Filter for step types (default="code")
+    Filter for steps of the provided type
     """
     user = User()
     user.step_type = step_type
@@ -183,7 +202,7 @@ def courses():
 
 def validate_id(ctx, param, value):
     if value < 1:
-        raise click.BadParameter('Should be a positive integer great than zero.')
+        raise click.BadParameter('Should be a positive integer greater than zero.')
     return value
 
 
@@ -197,7 +216,7 @@ def course_cmd(course_id):
     course = Course.get(user, course_id)
     click.secho(str(course), bold=True)
     click.secho(html2text.html2text(course.description))
-    click.secho("In order to see the content of the course, use the command: content course <id>")
+    click.secho("In order to see the content of a course, use the command: content course <id>")
 
 _ENTITIES = {'course': Course, 'section': Section, 'lesson': Lesson}
 
@@ -237,3 +256,39 @@ def content_cmd(entity, entity_id):
     click.secho(str(entity), bold=True)
     items = "\n".join(map(str, entity.items()))
     click.secho(items)
+
+@main.command('cache')
+@click.option(
+    "--cache_path", type=Path, default=COURSE_CACHE_FILE,
+    help='path to a JSON file to which to write the cache (defaults to an internal path)'
+)
+@click.argument("course_id", type=click.INT, callback=validate_id)
+def course_cache(course_id, cache_path=COURSE_CACHE_FILE):
+    """
+    Cache all of the steps in a course.\n
+    You can obtain the course ID by running the 'courses' command.
+    """
+    user = User()
+    course = Course.get(user, course_id)
+
+    click.secho(str(course), bold=True)
+    click.secho("Caching... This may take a while.", bold=True)
+
+    create_course_cache(user, course, cache_path)
+
+@main.command('set-cache')
+@click.argument("cache_path", type=Path)
+def set_course_cache(cache_path):
+    """
+    Replace the internal course cache with a user-provided one
+    """
+    cache = CourseCache(cache_path=cache_path)
+    cache.load()
+    try:
+        user = User()
+        course = Course.get(user, cache['course'])
+        click.secho(str(course), bold=True)
+    except:
+        click.secho("Unable to load course. Check to make sure the authenticated user has permission", bold=True, fg='color')
+    cache.cache_path = COURSE_CACHE_FILE
+    cache.save()
