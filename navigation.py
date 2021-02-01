@@ -1,51 +1,77 @@
 import attempt_cache
 from models.lesson import Lesson
+from models.section import Section
+from course_cache import CourseCache
 
 FORWARD = 1
 BACK = -1
 
+cached_lessons = CourseCache()
 
-def navigate(user, step_type, direction):
+def update_step_position(position, steps, direction):
+    position += direction
+    if position > len(steps) or position < 1:
+        # if we get here, it means we've run out of steps in this lesson!
+        raise ValueError
+    return position
+
+def navigate(user, step_type, direction, course_cache=None):
     data = attempt_cache.get_data()
     try:
-        steps = data['steps']
         position = data['current_position']
-        lesson_id = data['lesson_id']
+        lesson = Lesson.get(user, data['lesson_id'])
+        steps = lesson.items()
     except KeyError:
         return False
 
-    if direction < 0:
-        direction = -1
-        start = position - 1
-        stop = 0
-    else:
-        direction = 1
-        start = position + 1
-        stop = len(steps) + 1
+    # ensure that direction is either -1 or 1
+    # idk why we have to do this, but it was in the original code
+    direction = (-1,1)[direction > 0]
 
-    if (position + direction) > len(steps) or (position + direction) < 1:
-        return False
-
-    if step_type == "all":
-        data['current_position'] = position + direction
-        attempt_cache.set_data(data)
-        return True
-
-    lesson = Lesson.get(user, lesson_id)
-
-    steps = lesson.items()
-    for step_pos in range(start, stop, direction):
-        step = steps[step_pos - 1]
-        if step.block['name'] == step_type:
-            data['current_position'] = step_pos
+    lesson_pos = None
+    while True:
+        try:
+            position = update_step_position(position, steps, direction)
+        except ValueError:
+            if course_cache is None:
+                break
+            else:
+                try:
+                    lesson_id, lesson_pos = course_cache.get_next_lesson(
+                        lesson.id, direction, lesson_pos
+                    )
+                except ValueError:
+                    # if there isn't a next lesson
+                    raise
+                    break
+                lesson = Lesson.get(user, lesson_id)
+                data['lesson_id'] = lesson.id
+                steps = lesson.items()
+                data['steps'] = [s.id for s in steps]
+                position = (0, len(steps))[direction < 0]
+                continue
+        step = steps[position-1]
+        if step_type == "all" or step.block['name'] == step_type:
+            data['current_position'] = position
             attempt_cache.set_data(data)
             return True
     return False
 
 
 def next_step(user, step_type):
-    return navigate(user, step_type, FORWARD)
+    cached_lessons.load()
+    return navigate(user, step_type, FORWARD, cached_lessons)
 
 
 def prev_step(user, step_type):
-    return navigate(user, step_type, BACK)
+    cached_lessons.load()
+    return navigate(user, step_type, BACK, cached_lessons)
+
+
+def create_course_cache(user, course, out_path):
+    """create a cache of all of the lessons in a course"""
+    cache = CourseCache(course, out_path)
+    for section in course.items():
+        for lesson in section.items():
+            cache.data['lessons'].append(lesson.id)
+    cache.save()
