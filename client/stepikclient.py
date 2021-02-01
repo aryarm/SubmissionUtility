@@ -157,9 +157,10 @@ def download_dataset(user, filename, step_id=None, attempt_id=None):
 def submit_code(user, filename, lang=None, step_id=None, attempt_id=None):
     file_manager = FileManager()
 
-    if not file_manager.is_local_file(filename):
+    try:
+        text_contents = "".join(open(filename).readlines())
+    except FileNotFoundError:
         exit_util("File {} not found".format(filename))
-    text_contents = "".join(open(filename).readlines())
 
     if step_id is None:
         step_id = attempt_cache.get_step_id()
@@ -173,11 +174,10 @@ def submit_code(user, filename, lang=None, step_id=None, attempt_id=None):
     if lang is None:
         try:
             attempt = attempt_cache.get_attempt(step_id)
-            # TODO: check if attempt due date has passed and exit if so
             if attempt.due < datetime.datetime.now():
                 exit_util("This challenge has already expired. Create a new one with the 'dataset' command.")
         except KeyError:
-            exit_util("Please specify the attempt ID via the --attempt-id parameter")
+            exit_util("Tried to submit to a dataset challenge, but couldn't find a prior attempt. Please specify the attempt ID via the --attempt-id parameter")
         submission['submission']['reply'] = {
             "file": text_contents
         }

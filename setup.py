@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='stepik',
-    version='0.3',
+    version='0.1',
     py_modules=['stepik'],
     install_requires=[
         'Click',
