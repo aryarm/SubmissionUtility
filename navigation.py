@@ -1,4 +1,5 @@
 import attempt_cache
+from utils import exit_util
 from models.lesson import Lesson
 from models.section import Section
 from course_cache import CourseCache
@@ -41,14 +42,12 @@ def navigate(user, step_type, direction, course_cache=None):
                         lesson.id, direction, lesson_pos
                     )
                 except ValueError:
-                    # if there isn't a next lesson
-                    raise
                     break
                 lesson = Lesson.get(user, lesson_id)
                 data['lesson_id'] = lesson.id
                 steps = lesson.items()
                 data['steps'] = [s.id for s in steps]
-                position = (0, len(steps))[direction < 0]
+                position = (0, len(steps)+1)[direction < 0]
                 continue
         step = steps[position-1]
         if step_type == "all" or step.block['name'] == step_type:
@@ -59,19 +58,17 @@ def navigate(user, step_type, direction, course_cache=None):
 
 
 def next_step(user, step_type):
-    cached_lessons.load()
+    if not cached_lessons.load(user):
+        exit_util("Please first set the course ID via the 'course' command.")
     return navigate(user, step_type, FORWARD, cached_lessons)
 
 
 def prev_step(user, step_type):
-    cached_lessons.load()
+    if not cached_lessons.load(user):
+        exit_util("Please first set the course ID via the 'course' command.")
     return navigate(user, step_type, BACK, cached_lessons)
 
-
-def create_course_cache(user, course, out_path):
-    """create a cache of all of the lessons in a course"""
-    cache = CourseCache(course, out_path)
-    for section in course.items():
-        for lesson in section.items():
-            cache.data['lessons'].append(lesson.id)
-    cache.save()
+def create_course_cache(course):
+    global cached_lessons
+    cached_lessons = CourseCache(course)
+    return cached_lessons

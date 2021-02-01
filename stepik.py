@@ -114,8 +114,8 @@ def lang():
 def next_cmd():
     """
     Navigate to the next step in a course.\n
-    For the best navigation experience, you should create a course cache using the "cache" command before using this command.\n
-    Steps will be filtered according to the current step type. You can use the "type" command to change this.\n
+    For the best navigation experience, you should set the course using the "course" command before using this command.\n
+    Steps will be filtered according to the current step type. You can use the "type" command to change this.
     """
     user = User()
     if next_step(user, user.step_type):
@@ -125,7 +125,7 @@ def next_cmd():
         color = "green"
     else:
         message = "Unable to switch to next step in this lesson."
-        message += "\nIf you would like to proceed to the next lesson, check that you've created a course cache using the cache command."
+        message += "\nIf you would like to proceed to the next lesson, check that you've set the course using the 'course' command."
         color = "red"
 
     click.secho(message, bold=True, fg=color)
@@ -135,8 +135,8 @@ def next_cmd():
 def prev():
     """
     Navigate to the previous step in a course.\n
-    For the best navigation experience, you should create a course cache using the "cache" command before using this command.\n
-    Steps will be filtered according to the current step type. You can use the "type" command to change this.\n
+    For the best navigation experience, you should set the course using the "course" command before using this command.\n
+    Steps will be filtered according to the current step type. You can use the "type" command to change this.
     """
     user = User()
     if prev_step(user, user.step_type):
@@ -146,14 +146,14 @@ def prev():
         color = "green"
     else:
         message = "Unable to switch to previous step in this lesson."
-        message += "\nIf you would like to proceed to the previous lesson, check that you've created a course cache using the 'cache' command."
+        message += "\nIf you would like to proceed to the previous lesson, check that you've set the course using the 'course' command."
         color = "red"
 
     click.secho(message, bold=True, fg=color)
 
 
 @main.command("type")
-@click.argument("step_type", type=click.Choice(['all', 'code', 'text', 'dataset'], case_sensitive=False), default='dataset')
+@click.argument("step_type", type=click.Choice(['all', 'code', 'text', 'dataset'], case_sensitive=False), default='all')
 def type_cmd(step_type="dataset"):
     """
     Set a current step type.\n
@@ -218,13 +218,27 @@ def validate_id(ctx, param, value):
 @click.argument("course_id", type=click.INT, callback=validate_id)
 def course_cmd(course_id):
     """
-    Describe the course that has the provided course ID.
+    Switch to the course that has the provided course ID.
     """
     user = User()
     course = Course.get(user, course_id)
     click.secho(str(course), bold=True)
+
+    cache = create_course_cache(course)
+    if cache.load(user):
+        click.secho("Retrieved course from cache.", fg='green')
+    else:
+        click.secho("Caching course lessons...\nSince this is the first time you are navigating this course, this may take a while.", bold=True)
+        try:
+            cache.update()
+        except:
+            raise
+            exit_util("Unable to cache course. Do you have permission to view it?")
+        if not cache.load(user):
+            exit_util("Something went wrong. We were unable to cache this course.")
+
     click.secho(html2text.html2text(course.description))
-    click.secho("In order to see the content of a course, use the command: content course <id>")
+
 
 _ENTITIES = {'course': Course, 'section': Section, 'lesson': Lesson}
 
@@ -260,40 +274,3 @@ def content_cmd(entity, entity_id):
     click.secho(str(entity), bold=True)
     items = "\n".join(map(str, entity.items()))
     click.secho(items)
-
-@main.command('cache')
-@click.option(
-    "--cache_path", type=Path, default=COURSE_CACHE_FILE,
-    help='path to a JSON file to which to write the cache (defaults to an internal path)'
-)
-@click.argument("course_id", type=click.INT, callback=validate_id)
-def course_cache(course_id, cache_path=COURSE_CACHE_FILE):
-    """
-    Cache all of the steps in a course.\n
-    You can obtain the course ID by running the 'courses' command.
-    """
-    user = User()
-    course = Course.get(user, course_id)
-
-    click.secho(str(course), bold=True)
-    click.secho("Caching... This may take a while.", bold=True)
-
-    create_course_cache(user, course, cache_path)
-
-@main.command('set-cache')
-@click.argument("cache_path", type=Path)
-def set_course_cache(cache_path):
-    """
-    Replace the internal course cache with the provided one.
-    """
-    cache = CourseCache(cache_path=cache_path)
-    cache.load()
-    try:
-        user = User()
-        course = Course.get(user, cache['course'])
-        click.secho(str(course), bold=True)
-    except:
-        click.secho("Unable to load course. Check to make sure the authenticated user has permission", bold=True, fg='color')
-    cache.cache_path = COURSE_CACHE_FILE
-    cache.save()
-

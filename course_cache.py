@@ -1,5 +1,6 @@
 from pathlib import Path
 from filemanager import FileManager
+from models.course import Course
 from settings import COURSE_CACHE_FILE
 
 
@@ -7,23 +8,62 @@ class CourseCache():
     def __init__(self, course=None, cache_path=COURSE_CACHE_FILE):
         self.file_manager = FileManager()
         self.path = cache_path
+        self.course = course
         self._loaded = False
         if not isinstance(cache_path, Path):
             self.path = Path(self.path)
         if course is not None:
-            self.data = {'course': [course.id, course.title], 'lessons': []}
+            self._initialize_empty_cache()
 
 
-    def load(self):
+    def _initialize_empty_cache(self):
+        self.data = {'course': [self.course.id, self.course.title], 'lessons': []}
+
+
+    def load(self, user):
+        """try to load the cache for a course. return success status"""
         if not self._loaded:
+            try:
+                data = self.file_manager.read_json(self.path)
+            except FileNotFoundError:
+                return False
+            if self.course is None:
+                # we just create a dummy Course class here, since creating the actual
+                # class would require another http request
+                self.course = type('Course', (), {})()
+                self.course.id = data['current']
+                self.course.title = ""
+                self._initialize_empty_cache()
+            if data['current'] != self.course.id:
+                if self.course.id not in data['courses']:
+                    return False
+                self._save_as_current(data)
+            self.data['lessons'] = list(map(int, data['courses'][str(self.course.id)]['lessons']))
             self._loaded = True
-            self.data = self.file_manager.read_json(self.path)
-            self.data['course'][0] = int(self.data['course'][0])
-            self.data['lessons'] = list(map(int, self.data['lessons']))
+        return self._loaded
 
 
     def save(self):
-        self.file_manager.write_json(self.path, self.data)
+        try:
+            data = self.file_manager.read_json(self.path)
+        except FileNotFoundError:
+            data = {'current': self.course.id, 'courses': {self.course.id: self.data}}
+        self.file_manager.write_json(self.path, data)
+
+
+    def _save_as_current(self, data=None):
+        if data is None:
+            data = self.file_manager.read_json(self.path)
+        data['current'] = self.course.id
+        self.file_manager.write_json(self.path, data)
+
+
+    def update(self):
+        """create a cache of all of the lessons in the course"""
+        for section in self.course.items():
+            for lesson in section.items():
+                self.data['lessons'].append(lesson.id)
+        self.save()
 
 
     def get_next_lesson(self, lesson_id, direction, last_pos=None):
