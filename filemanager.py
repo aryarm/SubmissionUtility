@@ -1,5 +1,5 @@
-import json
 import os
+import json
 
 
 class FileManager:
@@ -8,7 +8,7 @@ class FileManager:
     """
 
     def __init__(self):
-        self.home = os.path.expanduser("~")
+        self.home = os.getcwd()
 
     def create_dir(self, dir_name):
         dir_name = self.get_name(dir_name)
@@ -18,7 +18,7 @@ class FileManager:
             return
 
     def get_name(self, filename):
-        return os.path.join(self.home, filename)
+        return filename
 
     def read_file(self, filename):
         filename = self.get_name(filename)
