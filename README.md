@@ -1,33 +1,39 @@
-#stepik-cli
+# stepik-cli
 A command line interface for [the Stepik API](https://stepik.org/api/docs)
+
+## Installation
+With `conda`:
+```
+conda install -c conda-forge 'aryarm::stepik-cli'
+```
+**or** with `pip`:
+```
+pip install git+https://github.com/aryarm/stepik-cli.git
+```
 
 ## Setup
 1. Create an account on [stepik.org](https://stepik.org/)
 2. Enroll in courses
 3. [Create a new OAuth2 application](https://stepik.org/oauth2/applications/register/) with the following information
-    - Name: _stepikcli_
-    - Client type: _confidential_
-    - Authorization Grant Type: _client-credentials_
-    - Redirect uris: N/A (ie leave this field blank)
-    Save the client ID and client secret for later use (see "authentication" below)
-4. Install the Stepik CLI
-    ```
-    conda install '/'
-    ```
-5. Authenticate yourself with the CLI
+    - **Name**: _stepikcli_
+    - **Client type**: _confidential_
+    - **Authorization Grant Type**: _client-credentials_
+    - **Redirect uris**: N/A (ie leave this field blank)
+    Save the client ID and client secret for later use (see #4 below)
+4. Authenticate yourself with the CLI
     ```
     stepik auth
     ```
     Enter the client ID and client secret from #3 above
-6. View a list of the course IDs for each of your courses. Pick one of them to submit your solutions to.
+5. View a list of the course IDs for each of your courses. Pick one of them to submit your solutions to.
     ```
     stepik courses
     ```
-7. Set the current course. You can always change this later.
+6. Set the current course. You can always change this later.
     ```
     stepik course <course-id>
     ```
-    For this command, replace `<course-id>` with the course ID you chose in #6.
+    For this command, replace `<course-id>` with the course ID you chose in #5.
 
 ## Navigation
 Just like the Stepik website, you can navigate between steps within your chosen course.
@@ -123,7 +129,7 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  auth     Authentication using username and password
+  auth     Authentication using OAuth2 client credentials
   content  View the content of a course, section, or lesson by its ID.
   course   Switch to the course that has the provided course ID.
   courses  Display a list of your enrolled courses and their course IDs.
@@ -138,7 +144,7 @@ Commands:
   type     Set a current step type
 ```
 
-## Bugs/Contributions/Suggestions
+## Bugs, Contributions, and Suggestions
 I welcome reports of bugs and/or suggestions for improvements to this software within Github's issue tab.
 
 However, I have limited capacity to maintain the code in this repository. If you would like to see a bug fixed, consider forking this repository and creating a pull request. I will gladly consider all submitted pull requests!
