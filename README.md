@@ -1,155 +1,146 @@
-#Submitter
-Command line utility for sending code submissions to Stepik.
+#stepik-cli
+A command line interface for [the Stepik API](https://stepik.org/api/docs)
 
-Usage: submitter [OPTIONS] COMMAND [ARGS]...
+## Setup
+1. Create an account on [stepik.org](https://stepik.org/)
+2. Enroll in courses
+3. [Create a new OAuth2 application](https://stepik.org/oauth2/applications/register/) with the following information
+    - Name: _stepikcli_
+    - Client type: _confidential_
+    - Authorization Grant Type: _client-credentials_
+    - Redirect uris: N/A (ie leave this field blank)
+    Save the client ID and client secret for later use (see "authentication" below)
+4. Install the Stepik CLI
+    ```
+    conda install '/'
+    ```
+5. Authenticate yourself with the CLI
+    ```
+    stepik auth
+    ```
+    Enter the client ID and client secret from #3 above
+6. View a list of the course IDs for each of your courses. Pick one of them to submit your solutions to.
+    ```
+    stepik courses
+    ```
+7. Set the current course. You can always change this later.
+    ```
+    stepik course <course-id>
+    ```
+    For this command, replace `<course-id>` with the course ID you chose in #6.
 
-  Submitter 0.3 Tools for submitting solutions to stepik.org
+## Navigation
+Just like the Stepik website, you can navigate between steps within your chosen course.
 
-**Options:**
+Once you've navigated to a step, the CLI will remember your position in the course.
 
-  **--version**
-  Show the version and exit.
-  
-  **--help**
-  Show this message and exit.
+### Setting your current step
+To start, you must jump to a step within the course:
+```
+stepik step <url>
+```
+You should replace `<url>` with the link to the step (ex: `https://stepik.org/lesson/9172/step/2`)
 
-**Commands:**
+You can check your current position in the course at any time.
+```
+stepik current
+```
 
-  **auth**     
-  Authentication using username and password
-  
-  **content**  
-  Content Course, Section and Lesson Format:...
-  
-  **course**   
-  About course
-  
-  **courses**  
-  Display enrolled courses list
-  
-  **current**  
-  Display the current step link
-  
-  **lang**     
-  Displays all available languages for current...
-  
-  **next**     
-  Switches to the next code challenge in the...
-  
-  **prev**     
-  Switches to the prev code challenge in the...
-  
-  **step**     
-  Setting new step as current target.
-  
-  **submit**   
-  Submit a solution to stepik system.
-  
-  **text**     
-  Display current step as text
-  
-  **type**     
-  Filter for step types (default="code")
+You can also view the content of the current step.
+```
+stepik text
+```
 
-## Beginners
-1. Register on [stepik.org](https://stepik.org/)
-2. Enroll for courses
-3. Enter to the console
-4. Install Submitter:
+### Navigating to the next or previous step
+Once you've navigated to a step, you can move back or forth within the course.
+```
+stepik next
+# or
+stepik prev
+```
 
-    `cd path/to/SubmissionUtility`
-    
-    `sudo python3 setup.py develop` 
-    
-    or 
-    
-    `sudo python3 setup.py build`
-    
-    `sudo python3 setup.py install`
-    
-4. Authentication:
+Each step has a _type_ that describes its content. For example, steps containing dataset challenges will have the _dataset_ type. When navigating between steps, you can instruct the Stepik CLI to filter for a specific step type. To set the step type, use the `type` command.
+```
+stepik type dataset
+```
 
-    `submitter auth`
-    
-    Enter username ana password
-    
-5. See courses list:
+### Viewing the table of contents of a course
+Each course is made up of sections. Each section is made up of lessons. And each lesson is made up of steps.
 
-    `submitter courses`
-    
-6. See a description course:
+You can view the content at any level of this hierarchy.
+```
+stepik content course <course-id>
+stepik content section <section-id>
+stepik content lesson <lesson-id>
+```
 
-    `submitter course <course_id>`
-    
-    Example: `submitter course 187`
-    
-7. See content of course:
+## Submissions
+To submit a solution to a problem, you must first set the current step.
+```
+stepik step <url>
+```
+You should replace `<url>` with the link to the step (ex: `https://stepik.org/lesson/9172/step/2`)
 
-    `submitter content course <course_id>`
-    
-    Example: `submitter content course 187`
-    
-    You will see the list of sections.
-    
-8. See content of section:
+### Attempting a dataset challenge
+To submit to a dataset challenge, you should first download a dataset from this step.
+```
+stepik dataset <dataset-path>
+```
+You should replace `<dataset-path>` with the path to a file in which you'd like to store the dataset.
 
-    `submitter content section <section_id>`
-    
-    Example: `submitter content section 537`
-    
-    You will see the list of lessons.
-    
-9. See content of lesson:
+### Submitting a solution
+To submit to a dataset challenge, you must first write your solution to a file.
+```
+stepik submit <solution-path>
+```
+You should replace `<solution-path>` with the path to the file that contains your solution.
 
-    `submitter content lesson <lesson_id>`
-    
-    Example: `submitter content lesson 12755`
-    
-    You will see the list of steps.
-    
-10. Set step as selected.
+### Attempting a code or text challenge
+To submit to a code or text challenge, you should use the `-l` optional argument to specify the programming language of your submission.
+```
+stepik submit -l python3 solution.py   # to submit to a code challenge
+stepik submit -l text solution.txt     # to submit to a text challenge
+```
+You can view a list of the available programming languages.
+```
+stepik lang
+```
 
-    `submitter step <url>`
-    
-    Example: `submitter content lesson/12755/step/14` or `submitter content https://stepik.org/lesson/12755/step/14`
-    
-11. See supported languages for step
+## Help
+Every command in the CLI has a `--help` argument with more detailed descriptions.
 
-    `submitter lang`
+## Available commands
+```
+$ stepik --help
+Usage: stepik [OPTIONS] COMMAND [ARGS]...
 
-12. See selected step text
+  The (unofficial) Stepik CLI for students
 
-    `submitter text`
-    
-    You will see text for selected step.
-    
-13. Open your text editor and create text. Save it in file.
-14. Submit your text to stepik.org
+  A command line tool for submitting solutions to stepik.org
 
-    `submitter submit <path/to/file/filename> -l <language> --step_id <id>`
-    
-    -l is not necessary, will use a file extension.
-    --step_id is not necessary, will use a current step.
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
 
-15. Navigate in the current lesson
-    
-    `submitter next` next step
-    
-    `submitter prev` previous step
-    
-16. Filter for a step type
+Commands:
+  auth     Authentication using username and password
+  content  View the content of a course, section, or lesson by its ID.
+  course   Switch to the course that has the provided course ID.
+  courses  Display a list of your enrolled courses and their course IDs.
+  current  Display the URL and step ID of the current step.
+  dataset  Attempt a dataset challenge.
+  lang     Lists the available programming languages for the current step.
+  next     Navigate to the next step in a course.
+  prev     Navigate to the previous step in a course.
+  step     Navigate the current position to the step at the provided URL.
+  submit   Submit a solution to stepik.
+  text     Display the contents of the current step.
+  type     Set a current step type
+```
 
-    By default filter a step type for 'code'.
-    
-    Use 'all', it disable filter.
-    
-    `submitter type <type_name>`
-    
-    type_name: code, text, choice and etc. type_name as 'all' will disable filter.
-    
-    Example: `submitter type code` `submitter type all` `submitter type text`
-    
-17. Current step
+## Bugs/Contributions/Suggestions
+I welcome reports of bugs and/or suggestions for improvements to this software within Github's issue tab.
 
-    `submitter current` out the current step link
-    
+However, I have limited capacity to maintain the code in this repository. If you would like to see a bug fixed, consider forking this repository and creating a pull request. I will gladly consider all submitted pull requests!
+
+I am not a member of the Stepik team. Nor am I in any way affiliated with them. I make no guarantee that this software will not eventually break, especially if Stepik ever changes their API.
