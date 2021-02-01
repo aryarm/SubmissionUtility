@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='submitter',
+    name='stepik',
     version='0.3',
-    py_modules=['submitter'],
+    py_modules=['stepik'],
     install_requires=[
         'Click',
         'requests',
@@ -12,6 +12,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        submitter=submitter:main
+        stepik=stepik:main
     ''',
 )
