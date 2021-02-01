@@ -57,16 +57,18 @@ def set_lesson_id(lesson_id):
     set_data(data)
 
 
-def get_lesson_id():
-    data = get_data()
+def get_lesson_id(data=None):
+    if data is None:
+        data = get_data()
     try:
         return data['lesson_id']
     except KeyError:
         return None
 
 
-def get_current_position():
-    data = get_data()
+def get_current_position(data=None):
+    if data is None:
+        data = get_data()
     try:
         return data['current_position']
     except KeyError:

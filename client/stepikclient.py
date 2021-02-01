@@ -78,11 +78,11 @@ def post_submit(user, data, attempt_id):
 
 def get_languages_list(user, step_id):
     if step_id is None:
-        exit_util('Set current step.')
+        exit_util('Please set the current step using the "step" command.')
     step = get_step(user, step_id)
     block = step['steps'][0]['block']
     if block['name'] != 'code':
-        exit_util('Type step is not code.')
+        exit_util('The current step does not have a coding challenge.')
     languages = block['options']['code_templates']
     return [lang for lang in languages]
 

@@ -163,15 +163,17 @@ def type_cmd(step_type="dataset"):
 @main.command()
 def current():
     """
-    Display the current step link
+    Display the URL and step ID of the current step.
     """
-    lesson_id = attempt_cache.get_lesson_id()
+    data = attempt_cache.get_data()
+    lesson_id = attempt_cache.get_lesson_id(data)
     if lesson_id is None:
-        exit_util("Set current step")
+        exit_util("You should first set the current step using the 'step' command.")
 
-    step_position = attempt_cache.get_current_position()
+    step_position = attempt_cache.get_current_position(data)
+    step_id = attempt_cache.get_step_id(data)
 
-    click.secho(STEPIK_HOST + "lesson/{}/step/{}".format(lesson_id, step_position), bold=True, fg="green")
+    click.secho(STEPIK_HOST + "lesson/{}/step/{}\t{}".format(lesson_id, step_position, step_id), bold=True, fg="green")
 
 
 @main.command()
