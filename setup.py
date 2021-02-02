@@ -2,8 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='stepik',
-    version='0.2.1',
-    py_modules=['stepik'],
+    version='0.2.2',
     install_requires=[
         'click',
         'requests',
