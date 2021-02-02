@@ -75,7 +75,10 @@ def dataset(dataset_path, step_id=None, attempt_id=None):
     Attempt a dataset challenge. Write the downloaded dataset to the provided path.
     """
     user = User()
-    attempt = stepikclient.download_dataset(user, dataset_path, step_id, attempt_id)
+    try:
+        attempt = stepikclient.download_dataset(user, dataset_path, step_id, attempt_id)
+    except:
+        exit_util("Unable to download dataset.")
     click.secho(str(attempt), bold=True, fg='green')
 
 
@@ -92,7 +95,10 @@ def submit(solution=None, l=None, step_id=None, attempt_id=None):
     """
     if solution is not None:
         user = User()
-        stepikclient.submit_code(user, solution, l, step_id, attempt_id)
+        try:
+            stepikclient.submit_code(user, solution, l, step_id, attempt_id)
+        except:
+            exit_util("Unable to submit solution.")
 
 
 @main.command()
