@@ -1,28 +1,49 @@
-{% set data = load_setup_py_data() %}
+{% set name = "stepik-cli" %}
+{% set version = load_setup_py_data().version %}
 
 package:
-  name: stepik-cli
-  version: "{{ data.version }}"
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
 
 source:
-  git_rev: {{ data.version }}
-  git_url: https://github.com/aryarm/stepik-cli.git
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
+  sha256: ccc48b8098fb71ce474ee2767b2fe79f7461a6087561ba2b61bb7d6908995ad3
 
 build:
-  script: "{{ PYTHON }} setup.py install --single-version-externally-managed --record=record.txt"
+  number: 0
+  entry_points:
+    - stepik=stepik.__main__:main
+  script: "{{ PYTHON }} -m pip install . -vv"
 
 requirements:
-  build:
-    - python
-    - setuptools
-  run:
-    - python
+  host:
     - click
-    - requests
     - colorama
     - html2text
+    - pip
+    - python
+    - requests
+  run:
+    - click
+    - colorama
+    - html2text
+    - python
+    - requests
+
+test:
+  imports:
+    - stepik
+    - stepik.client
+    - stepik.models
+  commands:
+    - stepik --help
 
 about:
-  home: https://github.com/aryarm/stepik-cli
-  summary: A command line interface for the Stepik API
+  home: "https://github.com/aryarm/stepik-cli"
+  summary: "A Stepik CLI for students"
+  doc_url: "https://github.com/aryarm/stepik-cli#README.md"
+  dev_url: "https://github.com/aryarm/stepik-cli"
 
+extra:
+  recipe-maintainers:
+    - aryarm
