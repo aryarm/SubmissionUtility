@@ -6,7 +6,7 @@ import sys
 
 def exit_util(message):
     click.secho(message, fg="red", bold=True)
-    sys.exit(0)
+    sys.exit(1)
 
 
 def get_lesson_id(step_url):

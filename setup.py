@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
     name='stepik',
@@ -10,9 +10,8 @@ setup(
         'colorama',
         'html2text'
     ],
+    packages=find_packages(include=['stepik']),
     entry_points={
-        'console_scripts': [
-            stepik=stepik.stepik:main
-        ]
-    }
+        'console_scripts': ['stepik=stepik.stepik:main']
+    },
 )
