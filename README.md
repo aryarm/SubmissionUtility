@@ -138,7 +138,7 @@ You can view a list of the available programming languages.
 stepik lang
 ```
 
-## An example
+### Example: Submitting to a dataset challenge
 As an example, let's consider [this dataset challenge](https://stepik.org/lesson/9172/step/2). To follow along, you must first register for [this course on the Stepik website](https://stepik.org/course/1/syllabus) and complete [the setup process](#Setup), including the authentication step.
 ```
 # switch to this course
