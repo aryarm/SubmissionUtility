@@ -25,3 +25,4 @@ requirements:
 about:
   home: https://github.com/aryarm/stepik-cli
   summary: A command line interface for the Stepik API
+
