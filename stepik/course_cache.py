@@ -36,7 +36,7 @@ class CourseCache():
                 self.course.title = ""
                 self._initialize_empty_cache()
             if data['current'] != self.course.id:
-                if self.course.id not in data['courses']:
+                if str(self.course.id) not in data['courses']:
                     return False
                 self._save_as_current(data)
             self.data['lessons'] = list(map(int, data['courses'][str(self.course.id)]['lessons']))
@@ -47,6 +47,8 @@ class CourseCache():
     def save(self):
         try:
             data = self.file_manager.read_json(self.path)
+            data['courses'][str(self.course.id)] = self.data
+            data['current'] = self.course.id
         except FileNotFoundError:
             data = {'current': self.course.id, 'courses': {self.course.id: self.data}}
         self.file_manager.write_json(self.path, data)

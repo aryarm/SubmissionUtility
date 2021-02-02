@@ -51,7 +51,7 @@ def auth():
         user.save()
 
     except Exception as e:
-        exit_util("Error: you should double-check that your client ID and client secret are correct." + str(e))
+        exit_util("\nError! Double-check that your client ID and client secret are correct." + str(e))
 
     click.secho("Authentication was successfull!", fg="green", bold=True)
 
@@ -238,7 +238,6 @@ def course_cmd(course_id):
         try:
             cache.update()
         except:
-            raise
             exit_util("Unable to cache course. Do you have permission to view it?")
         if not cache.load(user):
             exit_util("Something went wrong. We were unable to cache this course.")
