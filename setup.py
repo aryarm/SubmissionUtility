@@ -10,8 +10,9 @@ setup(
         'colorama',
         'html2text'
     ],
-    entry_points='''
-        [console_scripts]
-        stepik=stepik.stepik:main
-    ''',
+    entry_points={
+        'console_scripts': [
+            stepik=stepik.stepik:main
+        ]
+    }
 )
