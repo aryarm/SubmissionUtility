@@ -1,0 +1,27 @@
+{% set data = load_setup_py_data() %}
+
+package:
+  name: stepik-cli
+  version: "{{ data.get('version') }}"
+
+source:
+  git_rev: {{ data.get('version') }}
+  git_url: https://github.com/aryarm/stepik-cli.git
+
+build:
+  script: "{{ PYTHON }} setup.py install --single-version-externally-managed --record=record.txt"
+
+requirements:
+  build:
+    - python
+    - setuptools
+  run:
+    - python
+    - click
+    - requests
+    - colorama
+    - html2text
+
+about:
+  home: https://github.com/aryarm/stepik-cli
+  summary: A command line interface for the Stepik API
