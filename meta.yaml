@@ -1,13 +1,13 @@
 {% set name = "stepik-cli" %}
-{% set version = "0.3.2" %}
+{% set version = "0.3.3" %}
 
 package:
   name: "{{ name|lower }}"
   version: "{{ version }}"
 
 source:
-  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
-  sha256: ccc48b8098fb71ce474ee2767b2fe79f7461a6087561ba2b61bb7d6908995ad3
+  git_url: https://github.com/aryarm/stepik-cli.git
+  git_rev: "{{ version }}"
 
 build:
   number: 0
