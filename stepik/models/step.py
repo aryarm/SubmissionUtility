@@ -1,4 +1,4 @@
-from models.entity import Entity
+from stepik.models.entity import Entity
 
 
 class Step(Entity):

@@ -1,8 +1,9 @@
 import datetime
-from client.auth import auth_user_password
-from client.consts import GRAND_TYPE_CREDENTIALS
-from filemanager import FileManager
-from settings import CLIENT_FILE, CLIENT_ID, CLIENT_SECRET
+
+from stepik.client.auth import auth_user_password
+from stepik.client.consts import GRAND_TYPE_CREDENTIALS
+from stepik.filemanager import FileManager
+from stepik.settings import CLIENT_FILE, CLIENT_ID, CLIENT_SECRET
 
 
 class User:

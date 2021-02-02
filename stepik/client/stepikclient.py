@@ -1,20 +1,20 @@
-import json
 import os
+import json
 
 import time
 import click
 import requests
 import datetime
 
-import attempt_cache
-from models.attempt import Attempt
-from filemanager import FileManager
-from client.auth import get_headers
-from client.consts import STEPIK_API_URL, LESSONS_PK, SUBMISSIONS_PK, STEPS_PK, COURSES_PK, ATTEMPTS, SUBMISSIONS, \
+import stepik.attempt_cache
+from stepik.models.attempt import Attempt
+from stepik.filemanager import FileManager
+from stepik.client.auth import get_headers
+from stepik.client.consts import STEPIK_API_URL, LESSONS_PK, SUBMISSIONS_PK, STEPS_PK, COURSES_PK, ATTEMPTS, SUBMISSIONS, \
     SECTIONS, UNITS, SECTIONS_PK, LESSONS, STEPS
-from languagemanager import LanguageManager
+from stepik.languagemanager import LanguageManager
 
-from utils import exit_util, get_lesson_id, get_step_id, prepare_ids
+from stepik.utils import exit_util, get_lesson_id, get_step_id, prepare_ids
 
 
 def request(request_type, link, **kwargs):

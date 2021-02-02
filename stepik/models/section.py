@@ -1,8 +1,8 @@
-from client import stepikclient
-from models.entity import Entity
-from models.lesson import Lesson
-from models.unit import Unit
-from utils import entities_loader
+from stepik.client import stepikclient
+from stepik.models.entity import Entity
+from stepik.models.lesson import Lesson
+from stepik.models.unit import Unit
+from stepik.utils import entities_loader
 
 
 class Section(Entity):

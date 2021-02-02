@@ -1,7 +1,7 @@
 import re
+import sys
 
 import click
-import sys
 
 
 def exit_util(message):

@@ -1,7 +1,7 @@
 import requests
 import datetime
 
-from utils import exit_util
+from stepik.utils import exit_util
 
 
 def auth_user_password(user, password=None):

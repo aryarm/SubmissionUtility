@@ -1,7 +1,8 @@
 import datetime
-from settings import ATTEMPT_FILE
-from models.attempt import Attempt
-from filemanager import FileManager
+
+from stepik.settings import ATTEMPT_FILE
+from stepik.models.attempt import Attempt
+from stepik.filemanager import FileManager
 
 _file_manager = FileManager()
 

@@ -1,8 +1,8 @@
-from client import stepikclient
-from models.entity import Entity
-from models.section import Section
-from models.user import User
-from utils import entities_loader, all_entities_loader
+from stepik.client import stepikclient
+from stepik.models.entity import Entity
+from stepik.models.section import Section
+from stepik.models.user import User
+from stepik.utils import entities_loader, all_entities_loader
 
 
 class Course(Entity):

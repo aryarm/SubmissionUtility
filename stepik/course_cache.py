@@ -1,7 +1,8 @@
 from pathlib import Path
-from filemanager import FileManager
-from models.course import Course
-from settings import COURSE_CACHE_FILE
+
+from stepik.filemanager import FileManager
+from stepik.models.course import Course
+from stepik.settings import COURSE_CACHE_FILE
 
 
 class CourseCache():
