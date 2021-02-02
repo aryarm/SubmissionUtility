@@ -10,8 +10,8 @@ setup(
         'colorama',
         'html2text'
     ],
-    packages=find_packages(include=['stepik', 'stepik.*']),
+    packages=find_packages(include=['stepik', 'stepik.client', 'stepik.models']),
     entry_points={
-        'console_scripts': ['stepik=stepik.stepik:main']
+        'console_scripts': ['stepik=stepik.__main__:main']
     },
 )

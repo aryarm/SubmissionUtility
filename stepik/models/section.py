@@ -1,7 +1,7 @@
 from stepik.client import stepikclient
-from stepik.models.entity import Entity
-from stepik.models.lesson import Lesson
-from stepik.models.unit import Unit
+from .entity import Entity
+from .lesson import Lesson
+from .unit import Unit
 from stepik.utils import entities_loader
 
 

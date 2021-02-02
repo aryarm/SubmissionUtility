@@ -1,7 +1,7 @@
 from stepik.client import stepikclient
-from stepik.models.entity import Entity
-from stepik.models.section import Section
-from stepik.models.user import User
+from .entity import Entity
+from .section import Section
+from .user import User
 from stepik.utils import entities_loader, all_entities_loader
 
 

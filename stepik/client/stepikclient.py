@@ -7,7 +7,7 @@ import requests
 import datetime
 
 import stepik.attempt_cache
-from stepik.models.attempt import Attempt
+from .attempt import Attempt
 from stepik.filemanager import FileManager
 from stepik.client.auth import get_headers
 from stepik.client.consts import STEPIK_API_URL, LESSONS_PK, SUBMISSIONS_PK, STEPS_PK, COURSES_PK, ATTEMPTS, SUBMISSIONS, \

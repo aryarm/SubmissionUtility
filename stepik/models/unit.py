@@ -1,4 +1,4 @@
-from stepik.models.entity import Entity
+from .entity import Entity
 
 
 class Unit(Entity):

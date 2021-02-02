@@ -1,6 +1,6 @@
 from stepik.client import stepikclient
-from stepik.models.entity import Entity
-from stepik.models.step import Step
+from .entity import Entity
+from .step import Step
 from stepik.utils import entities_loader
 
 
