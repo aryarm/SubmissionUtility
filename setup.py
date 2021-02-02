@@ -12,6 +12,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        stepik=stepik:main
+        stepik=stepik.stepik:main
     ''',
 )
