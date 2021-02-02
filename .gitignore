@@ -1,4 +1,7 @@
 stepik.egg-info/
+stepik_cli.egg-info/
 .idea/
 __pycache__
 .stepik/
+dist/
+build/

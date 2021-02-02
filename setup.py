@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name='stepik',
+    name='stepik-cli',
     version='0.3.0',
     description="A Stepik CLI for students",
     long_description=long_description,
