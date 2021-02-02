@@ -138,6 +138,23 @@ You can view a list of the available programming languages.
 stepik lang
 ```
 
+## An example
+As an example, let's consider [this dataset challenge](https://stepik.org/lesson/9172/step/2). To follow along, you must first register for [this course on the Stepik website](https://stepik.org/course/1/syllabus) and complete [the setup process](#Setup), including the authentication step.
+```
+# switch to this course
+stepik course 1
+# set the step
+stepik step https://stepik.org/lesson/9172/step/2
+# view the problem statement
+stepik text
+# download the dataset
+stepik dataset dataset.txt
+# solve the problem and create a solution file
+cat dataset.txt | tr ' ' '+' | bc > solution.txt
+# submit the solution
+stepik submit solution.txt
+```
+
 ## Help
 Every command in the CLI has a `--help` argument with more detailed descriptions.
 
