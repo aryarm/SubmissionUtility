@@ -1,5 +1,5 @@
 {% set name = "stepik-cli" %}
-{% set version = load_setup_py_data().version %}
+{% set version = "0.3.2" %}
 
 package:
   name: "{{ name|lower }}"
