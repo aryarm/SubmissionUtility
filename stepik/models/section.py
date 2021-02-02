@@ -2,7 +2,7 @@ from stepik.client import stepikclient
 from .entity import Entity
 from .lesson import Lesson
 from .unit import Unit
-from stepik.utils import entities_loader
+from ..utils import entities_loader
 
 
 class Section(Entity):

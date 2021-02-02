@@ -3,19 +3,19 @@ import click
 import html2text
 from pathlib import Path
 
-import stepik.attempt_cache
-from stepik.course_cache import CourseCache
-from stepik.client import stepikclient
-from stepik.client.auth import auth_user_password
-from stepik.client.consts import STEPIK_HOST, GRAND_TYPE_CREDENTIALS
-from stepik.filemanager import FileManager
-from stepik.models.course import Course
-from stepik.models.lesson import Lesson
-from stepik.models.section import Section
-from stepik.models.user import User
-from stepik.navigation import prev_step, next_step, create_course_cache
-from stepik.settings import APP_FOLDER, COURSE_CACHE_FILE, CLIENT_ID, CLIENT_SECRET
-from stepik.utils import exit_util
+from . import attempt_cache
+from .course_cache import CourseCache
+from .client import stepikclient
+from .client.auth import auth_user_password
+from .client.consts import STEPIK_HOST, GRAND_TYPE_CREDENTIALS
+from .filemanager import FileManager
+from .models.course import Course
+from .models.lesson import Lesson
+from .models.section import Section
+from .models.user import User
+from .navigation import prev_step, next_step, create_course_cache
+from .settings import APP_FOLDER, COURSE_CACHE_FILE, CLIENT_ID, CLIENT_SECRET
+from .utils import exit_util
 
 
 @click.group()

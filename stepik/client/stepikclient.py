@@ -6,15 +6,15 @@ import click
 import requests
 import datetime
 
-import stepik.attempt_cache
 from .attempt import Attempt
-from stepik.filemanager import FileManager
-from stepik.client.auth import get_headers
-from stepik.client.consts import STEPIK_API_URL, LESSONS_PK, SUBMISSIONS_PK, STEPS_PK, COURSES_PK, ATTEMPTS, SUBMISSIONS, \
+from .auth import get_headers
+from .consts import STEPIK_API_URL, LESSONS_PK, SUBMISSIONS_PK, STEPS_PK, COURSES_PK, ATTEMPTS, SUBMISSIONS, \
     SECTIONS, UNITS, SECTIONS_PK, LESSONS, STEPS
-from stepik.languagemanager import LanguageManager
 
-from stepik.utils import exit_util, get_lesson_id, get_step_id, prepare_ids
+from .. import attempt_cache
+from ..filemanager import FileManager
+from ..languagemanager import LanguageManager
+from ..utils import exit_util, get_lesson_id, get_step_id, prepare_ids
 
 
 def request(request_type, link, **kwargs):

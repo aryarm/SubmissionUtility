@@ -1,8 +1,8 @@
-import stepik.attempt_cache
-from stepik.utils import exit_util
-from stepik.models.lesson import Lesson
-from stepik.models.section import Section
-from stepik.course_cache import CourseCache
+from . import attempt_cache
+from .utils import exit_util
+from .models.lesson import Lesson
+from .models.section import Section
+from .course_cache import CourseCache
 
 FORWARD = 1
 BACK = -1

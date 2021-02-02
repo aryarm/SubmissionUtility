@@ -1,7 +1,7 @@
 from stepik.client import stepikclient
 from .entity import Entity
 from .step import Step
-from stepik.utils import entities_loader
+from ..utils import entities_loader
 
 
 class Lesson(Entity):
