@@ -35,7 +35,7 @@ def main():
 @main.command()
 def auth():
     """
-    Authentication using OAuth2 client credentials
+    Authenticate using your OAuth2 credentials.
     """
     click.echo("Enter your registration info from https://stepik.org/oauth2/applications/")
 
@@ -156,7 +156,7 @@ def prev():
 @click.argument("step_type", type=click.Choice(['all', 'code', 'text', 'dataset'], case_sensitive=False), default='all')
 def type_cmd(step_type="dataset"):
     """
-    Set a current step type.\n
+    Filter for steps with this step type.\n
     When navigating using the "next" or "prev" commands, any steps that are not of this type will be skipped.
     """
     user = User()

@@ -15,7 +15,7 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  auth     Authentication using OAuth2 client credentials
+  auth     Authenticate using your OAuth2 credentials.
   content  View the content of a course, section, or lesson by its ID.
   course   Switch to the course that has the provided course ID.
   courses  Display a list of your enrolled courses and their course IDs.
@@ -27,7 +27,7 @@ Commands:
   step     Navigate the current position to the step at the provided URL.
   submit   Submit a solution to stepik.
   text     Display the contents of the current step.
-  type     Set a current step type
+  type     Filter for steps with this step type.
 ```
 
 ## Installation
@@ -48,6 +48,7 @@ pip install git+https://github.com/aryarm/stepik-cli.git
     - **Client type**: _confidential_
     - **Authorization Grant Type**: _client-credentials_
     - **Redirect uris**: N/A (ie leave this field blank)
+
     Save the client ID and client secret for later use (see #4 below)
 4. Authenticate yourself with the CLI
     ```
