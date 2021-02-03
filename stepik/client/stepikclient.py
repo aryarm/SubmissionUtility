@@ -88,7 +88,7 @@ def get_languages_list(user, step_id):
 
 
 def evaluate(user, attempt_id):
-    click.secho("Evaluating...", bold=True, fg='white')
+    click.secho("Evaluating...", bold=True, fg='white', err=True)
     time_out = 0.1
     while True:
         result = get_submission(user, attempt_id)
@@ -96,10 +96,12 @@ def evaluate(user, attempt_id):
         hint = result['submissions'][0]['hint']
         if status != 'evaluation':
             break
-        click.echo("..", nl=False)
+        click.echo("..", nl=False, err=True)
         time.sleep(time_out)
         time_out += time_out
-    click.secho("Your solution is {}\n{}".format(status, hint), fg=['red', 'green'][status == 'correct'], bold=True)
+    click.secho("Your solution is {}".format(status), fg=['red', 'green'][status == 'correct'], bold=True)
+    if status != 'correct':
+        exit_util(hint, 2)
 
 
 def get_dataset_attempt(user, step_id, attempt_id=None):

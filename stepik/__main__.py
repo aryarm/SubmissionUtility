@@ -53,7 +53,7 @@ def auth():
     except Exception as e:
         exit_util("\nError! Double-check that your client ID and client secret are correct." + str(e))
 
-    click.secho("Authentication was successfull!", fg="green", bold=True)
+    click.secho("Authentication was successfull!", fg="green", bold=True, err=True)
 
 
 @main.command("step")
@@ -79,7 +79,7 @@ def dataset(dataset_path, step_id=None, attempt_id=None):
         attempt = stepikclient.download_dataset(user, dataset_path, step_id, attempt_id)
     except:
         exit_util("Unable to download dataset.")
-    click.secho(str(attempt), bold=True, fg='green')
+    click.secho(str(attempt), bold=True, fg='green', err=True)
 
 
 @main.command()
@@ -113,8 +113,6 @@ def lang():
     languages.sort()
     click.secho(", ".join(languages), bold=True, nl=False)
 
-    click.echo("")
-
 
 @main.command("next")
 def next_cmd():
@@ -134,7 +132,7 @@ def next_cmd():
         message += "\nIf you would like to proceed to the next lesson, check that you've set the course using the 'course' command."
         color = "red"
 
-    click.secho(message, bold=True, fg=color)
+    click.secho(message, bold=True, fg=color, err=True)
 
 
 @main.command()
@@ -155,7 +153,7 @@ def prev():
         message += "\nIf you would like to proceed to the previous lesson, check that you've set the course using the 'course' command."
         color = "red"
 
-    click.secho(message, bold=True, fg=color)
+    click.secho(message, bold=True, fg=color, err=True)
 
 
 @main.command("type")
@@ -169,7 +167,10 @@ def type_cmd(step_type="dataset"):
     user.step_type = step_type
     user.save()
 
-    click.secho("Steps will filter for {}".format(step_type), bold=True, fg="green")
+    if step_type == 'all':
+        click.secho("Steps will not be filtered for their type when navigating.", bold=True, fg="green", err=True)
+    else:
+        click.secho("Steps that are not of type {} will be ignored when navigating.".format(step_type), bold=True, fg="green", err=True)
 
 
 @main.command()
@@ -224,7 +225,8 @@ def validate_id(ctx, param, value):
 @click.argument("course_id", type=click.INT, callback=validate_id)
 def course_cmd(course_id):
     """
-    Switch to the course that has the provided course ID.
+    Switch to the course that has the provided course ID.\n
+    Cache the course for navigation purposes and display a description of the course.
     """
     user = User()
     course = Course.get(user, course_id)
@@ -232,9 +234,9 @@ def course_cmd(course_id):
 
     cache = create_course_cache(course)
     if cache.load(user):
-        click.secho("Retrieved course from cache.", fg='green')
+        click.secho("Retrieved course from cache.", fg='green', err=True)
     else:
-        click.secho("Caching course lessons...\nSince this is the first time you are navigating this course, this may take a while.", bold=True)
+        click.secho("Caching course lessons...\nSince this is the first time you are navigating this course, this may take a while.", bold=True, err=True)
         try:
             cache.update()
         except:
@@ -265,7 +267,6 @@ def content_cmd(entity, entity_id):
         content course <course_id>\n
         content section <section_id>\n
         content lesson <lesson_id>\n
-
     """
     if entity not in _ENTITIES:
         return

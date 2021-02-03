@@ -4,9 +4,9 @@ import sys
 import click
 
 
-def exit_util(message):
-    click.secho(message, fg="red", bold=True)
-    sys.exit(1)
+def exit_util(message, exit_code=1):
+    click.secho(message, fg="red", bold=True, err=True)
+    sys.exit(exit_code)
 
 
 def get_lesson_id(step_url):
