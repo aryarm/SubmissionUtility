@@ -5,13 +5,13 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='stepik-cli',
-    version='0.3.5',
+    version='0.4.0',
     description="A Stepik CLI for students",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/aryarm/stepik-cli",
     install_requires=[
-        'click',
+        'click>=3.0',
         'requests',
         'colorama',
         'html2text'

@@ -72,7 +72,7 @@ def step_cmd(link=None):
 @click.option("--attempt_id", help="attempt id")
 def dataset(dataset_path, step_id=None, attempt_id=None):
     """
-    Attempt a dataset challenge. Write the downloaded dataset to the provided path.
+    Attempt a dataset challenge. Writes the downloaded dataset to the provided path.
     """
     user = User()
     try:
@@ -98,7 +98,7 @@ def submit(solution=None, l=None, step_id=None, attempt_id=None):
         try:
             stepikclient.submit_code(user, solution, l, step_id, attempt_id)
         except:
-            exit_util("Unable to submit solution.")
+            exit_util("Unable to submit solution. There was some sort of error.")
 
 
 @main.command()
@@ -236,7 +236,7 @@ def course_cmd(course_id):
     if cache.load(user):
         click.secho("Retrieved course from cache.", fg='green', err=True)
     else:
-        click.secho("Caching course lessons...\nSince this is the first time you are navigating this course, this may take a while.", bold=True, err=True)
+        click.secho("Caching course lessons...\nSince this is the first time you are navigating this course, this may take a minute.", bold=True, err=True)
         try:
             cache.update()
         except:

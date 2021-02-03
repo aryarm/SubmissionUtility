@@ -63,9 +63,10 @@ class CourseCache():
 
     def update(self):
         """create a cache of all of the lessons in the course"""
-        for section in self.course.items():
-            for lesson in section.items():
-                self.data['lessons'].append(lesson.id)
+        self.data['lessons'] = [
+            lesson.id for section in self.course.items()
+            for lesson in section.items()
+        ]
         self.save()
 
 
