@@ -88,18 +88,22 @@ def get_languages_list(user, step_id):
 
 
 def evaluate(user, attempt_id):
-    click.secho("Evaluating...", bold=True, fg='white', err=True)
+    click.secho("Evaluating...", bold=True, fg='white', err=True, nl=False)
     time_out = 0.1
+    max_time = 60
     while True:
         result = get_submission(user, attempt_id)
         status = result['submissions'][0]['status']
         hint = result['submissions'][0]['hint']
         if status != 'evaluation':
             break
-        click.echo("..", nl=False, err=True)
+        if time_out >= max_time:
+            exit_util("\nExceeded maximum evaluation time.", 3)
+        click.echo(".", nl=False, err=True)
         time.sleep(time_out)
+        # time_out doubles each time (so it's exponential!)
         time_out += time_out
-    click.secho("Your solution is {}".format(status), fg=['red', 'green'][status == 'correct'], bold=True)
+    click.secho("\nYour solution is {}".format(status), fg=['red', 'green'][status == 'correct'], bold=True)
     if status != 'correct':
         exit_util(hint, 2)
 
@@ -160,7 +164,7 @@ def submit_code(user, filename, lang=None, step_id=None, attempt_id=None):
     file_manager = FileManager()
 
     try:
-        text_contents = "".join(open(filename).readlines())
+        text_contents = "".join(file_manager.read_file(filename))
     except FileNotFoundError:
         exit_util("File {} not found".format(filename))
 
