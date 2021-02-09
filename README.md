@@ -31,6 +31,10 @@ Commands:
 ```
 
 ## Installation
+Via `conda`:
+```
+conda install -c conda-forge 'aryarm::stepik-cli'
+```
 Via `pip`:
 ```
 pip install stepik-cli
