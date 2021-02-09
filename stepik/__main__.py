@@ -49,7 +49,8 @@ def auth():
             click.secho("Authenticating...")
         auth_user_password(user)
         user.save()
-
+    except SystemExit:
+        raise
     except Exception as e:
         exit_util("\nError! Double-check that your client ID and client secret are correct." + str(e))
 
@@ -77,6 +78,9 @@ def dataset(dataset_path, step_id=None, attempt_id=None):
     user = User()
     try:
         attempt = stepikclient.download_dataset(user, dataset_path, step_id, attempt_id)
+    except SystemExit:
+        # if we exited within the stepikclient, we should just honor that
+        raise
     except:
         exit_util("Unable to download dataset.")
     click.secho(str(attempt), bold=True, fg='green', err=True)
@@ -97,6 +101,9 @@ def submit(solution=None, l=None, step_id=None, attempt_id=None):
         user = User()
         try:
             stepikclient.submit_code(user, solution, l, step_id, attempt_id)
+        except SystemExit:
+            # if we exited within the stepikclient, we should just honor that
+            raise
         except:
             exit_util("Unable to submit solution. There was some sort of error.")
 
@@ -246,7 +253,7 @@ def course_cmd(course_id, recache=False):
         click.secho((
             "Caching course lessons...\nSince this is the first time you are navigating"
             " this course, this may take a minute."
-        ), fg='red', bold=True, err=True)
+        ), fg='white', bold=True, err=True)
         try:
             cache.update()
         except:

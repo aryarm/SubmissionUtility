@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='stepik-cli',
-    version='0.4.1',
+    version='0.4.2',
     description="A Stepik CLI for students",
     long_description=long_description,
     long_description_content_type="text/markdown",
