@@ -223,7 +223,14 @@ def validate_id(ctx, param, value):
 
 @main.command('course')
 @click.argument("course_id", type=click.INT, callback=validate_id)
-def course_cmd(course_id):
+@click.option(
+    '--recache', is_flag=True, help=(
+        "Force a recache of this course. Provide this flag if sections or lessons in "
+        "the course have changed since your last cache of the course. Otherwise, "
+        "you will have unexpected results when navigating via the next/prev commands."
+    )
+)
+def course_cmd(course_id, recache=False):
     """
     Switch to the course that has the provided course ID.\n
     Cache the course for navigation purposes and display a description of the course.
@@ -233,10 +240,13 @@ def course_cmd(course_id):
     click.secho(str(course), bold=True)
 
     cache = create_course_cache(course)
-    if cache.load(user):
+    if cache.load(user) and not recache:
         click.secho("Retrieved course from cache.", fg='green', err=True)
     else:
-        click.secho("Caching course lessons...\nSince this is the first time you are navigating this course, this may take a minute.", bold=True, err=True)
+        click.secho((
+            "Caching course lessons...\nSince this is the first time you are navigating"
+            " this course, this may take a minute."
+        ), fg='red', bold=True, err=True)
         try:
             cache.update()
         except:
