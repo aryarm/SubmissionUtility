@@ -16,8 +16,9 @@ def update_step_position(position, steps, direction):
         raise ValueError
     return position
 
-def navigate(user, step_type, direction, course_cache=None):
-    data = attempt_cache.get_data()
+def navigate(user, step_type, direction, data=None, course_cache=None):
+    if data is None:
+        data = attempt_cache.get_data()
     try:
         position = data['current_position']
         lesson = Lesson.get(user, data['lesson_id'])
@@ -57,16 +58,25 @@ def navigate(user, step_type, direction, course_cache=None):
     return False
 
 
-def next_step(user, step_type):
-    if not cached_lessons.load(user):
+def _validate_nav(user, data):
+    """check that it's possible to navigate through this course"""
+    if cached_lessons.load(user):
+        if int(data['lesson_id']) not in cached_lessons.data['lessons']:
+            exit_util("Unable to locate the current lesson within the course cache. Have you set the course using the 'course' command?")
+    else:
         exit_util("Please first set the course ID via the 'course' command.")
-    return navigate(user, step_type, FORWARD, cached_lessons)
+
+
+def next_step(user, step_type):
+    data = attempt_cache.get_data()
+    _validate_nav(user, data)
+    return navigate(user, step_type, FORWARD, data, cached_lessons)
 
 
 def prev_step(user, step_type):
-    if not cached_lessons.load(user):
-        exit_util("Please first set the course ID via the 'course' command.")
-    return navigate(user, step_type, BACK, cached_lessons)
+    data = attempt_cache.get_data()
+    _validate_nav(user, data)
+    return navigate(user, step_type, BACK, data, cached_lessons)
 
 def create_course_cache(course):
     global cached_lessons
